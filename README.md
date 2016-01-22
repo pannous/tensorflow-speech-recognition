@@ -12,7 +12,7 @@ Extensions to current tensorflow probably needed:
 Ultimate goal:
 Create a decent standalone speech recognition for Linux etc.
 Some people say we have the models but not enough training data.
-We disagree: There is plenty of training data (100GB [here](http://www.openslr.org/12), on Gutenberg, Movies with transcripts, YouTube with captions etc etc) we just need a simple yet powerful model. It's only a question of time...
+We disagree: There is plenty of training data (100GB [here](http://www.openslr.org/12), on Gutenberg, synthetic Text to Speech snippets, Movies with transcripts, YouTube with captions etc etc) we just need a simple yet powerful model. It's only a question of time...
 
 
 **Collaborators wanted!** We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party, no matter your background.
