@@ -16,3 +16,5 @@ We disagree: There is plenty of training data (100GB [here](http://www.openslr.o
 
 
 **Collaborators wanted!** We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party, no matter your background.
+
+We are still in the planning phase! See train.py for the suggested general architecture. You can contribute right now by implementing one of the (easy) train methods. It is important that we have a mechanism to persist and load subsets of the whole model, and to make it extensible on demand. So far the graph.load and saver.load mechanisms are insufficient for that. 
