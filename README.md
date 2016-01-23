@@ -8,7 +8,7 @@ Extensions to current tensorflow probably needed:
 * [Sliding Window GPU implementation](https://github.com/tensorflow/tensorflow/issues/211)
 * FFT / speech feature extraction preprocessing ( or same model with pretraining?)
 * Continuous seq2seq adaptation
-* Modular models + persistance
+* Modular graphs/models + persistance
 
 Ultimate goal:
 Create a decent standalone speech recognition for Linux etc.
