@@ -39,7 +39,7 @@ class RecordThread(threading.Thread):
             record()
 
 def say(what):
-  os.system("say  %s"%what)          
+  os.system("say %s " % what)
 
 def teach(lock):
   # blocking

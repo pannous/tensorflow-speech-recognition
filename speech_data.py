@@ -13,6 +13,7 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 # SOURCE_URL = 'https://www.dropbox.com/s/eb5zqskvnuj0r78/spoken_words.tar?dl=0'
 SOURCE_URL = 'http://pannous.net/' #spoken_numbers.tar'
 NUMBER_IMAGES = 'spoken_numbers.tar'
+NUMBER_WAVES = 'spoken_numbers_wav.tar'
 TEST_INDEX='test_index.txt'
 TRAIN_INDEX='train_index.txt'
 # TRAIN_INDEX='train_words_index.txt'
