@@ -42,7 +42,7 @@ def maybe_download(filename, work_directory):
 
 class DataSet(object):
 
-  def __init__(self, images, labels, fake_data=False, one_hot=False):
+  def __init__(self, images, labels, fake_data=False, one_hot=False, load=False):
     """Construct a DataSet. one_hot arg is used only if fake_data is true."""
     if fake_data:
       self._num_examples = 10000
@@ -54,10 +54,12 @@ class DataSet(object):
       self._num_examples = num
     self.cache={}
     self._image_names = numpy.array(images)
-    self._images=[]
     self._labels = labels
     self._epochs_completed = 0
     self._index_in_epoch = 0
+    self._images=[]
+    if load: # Otherwise loaded on demand
+      self._images=self.load(self._image_names)
 
   @property
   def images(self):
@@ -81,6 +83,7 @@ class DataSet(object):
 
   # only apply to a subset of all images at one time
   def load(self,image_names):
+    print("loading %d images"%len(image_names))
     return list(map(self.load_image,image_names)) # python3 map object WTF
 
   def load_image(self,image_name):
@@ -159,7 +162,7 @@ def read_data_sets(train_dir, fake_data=False, one_hot=False):
     data_sets.test = DataSet([], [], fake_data=True, one_hot=one_hot)
     return data_sets
 
-  VALIDATION_SIZE = 1000
+  VALIDATION_SIZE = 2000
 
   local_file = maybe_download(NUMBER_IMAGES, train_dir)
   train_images = extract_images(TRAIN_INDEX,train=True)
@@ -171,13 +174,13 @@ def read_data_sets(train_dir, fake_data=False, one_hot=False):
   # validation_labels = train_labels[:VALIDATION_SIZE]
   # train_images = train_images[VALIDATION_SIZE:]
   # train_labels = train_labels[VALIDATION_SIZE:]
-  validation_images = test_images[:VALIDATION_SIZE]
-  validation_labels = test_labels[:VALIDATION_SIZE]
+  # validation_images = test_images[:VALIDATION_SIZE]
+  # validation_labels = test_labels[:VALIDATION_SIZE]
   test_images = test_images[VALIDATION_SIZE:]
   test_labels = test_labels[VALIDATION_SIZE:]
 
-  data_sets.train = DataSet(train_images, train_labels)
-  data_sets.validation = DataSet(validation_images, validation_labels)
-  data_sets.test = DataSet(test_images, test_labels)
+  data_sets.train = DataSet(train_images, train_labels , load=False)
+  # data_sets.validation = DataSet(validation_images, validation_labels, load=True)
+  data_sets.test = DataSet(test_images, test_labels, load=True)
 
   return data_sets

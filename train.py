@@ -31,7 +31,7 @@ import tensorflow as tf
 
 import speech_data
 import speech_model
-import speech_encoder
+from speech_encoder import train_spectrogram_encoder
 
 tf.app.flags.DEFINE_float("learning_rate_decay_factor", 0.99, "Learning rate decays by this much.")
 tf.app.flags.DEFINE_float("max_gradient_norm", 10.0, "Clip gradients to this norm.")
@@ -58,7 +58,7 @@ def train_all():
   # even if one individual can only contribute the processing power of i.e. one GPU/night
   while true:
     # train_autoencoder()  # wave -> wave
-    speech_encoder.train_spectrogram_encoder() # spectrogram -> vector
+    train_spectrogram_encoder() # spectrogram -> vector
     # train_tts()   # text -> wave
     # train_internal_model() # wave -> vector
     # train_phonemes()    # phonemes <-> text (easy)
