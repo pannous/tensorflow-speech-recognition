@@ -31,6 +31,7 @@ import tensorflow as tf
 
 import speech_data
 import speech_model
+import speech_encoder
 
 tf.app.flags.DEFINE_float("learning_rate_decay_factor", 0.99, "Learning rate decays by this much.")
 tf.app.flags.DEFINE_float("max_gradient_norm", 10.0, "Clip gradients to this norm.")
@@ -56,13 +57,13 @@ def train_all():
   # so that the community constantly improves the model,
   # even if one individual can only contribute the processing power of i.e. one GPU/night
   while true:
-    train_autoencoder()  # wave -> wave
-    train_tts()   # text -> wave
-    
-    train_internal_model() # wave -> vector
-    train_phonemes()    # phonemes <-> text (easy)
-    train_stt_words()   # wave snippet -> word
-    train_stt()         # wave stream -> text  , the whole package 
+    # train_autoencoder()  # wave -> wave
+    speech_encoder.train_spectrogram_encoder() # spectrogram -> vector
+    # train_tts()   # text -> wave
+    # train_internal_model() # wave -> vector
+    # train_phonemes()    # phonemes <-> text (easy)
+    # train_stt_words()   # wave snippet -> word
+    # train_stt()         # wave stream -> text  , the whole package
     
 def train_phonemes():
   """Train a phoneme->english translation model."""
@@ -130,7 +131,7 @@ def main(_):
   elif FLAGS.decode:
     decode()
   else:
-    train()
+    train_all()
 
 if __name__ == "__main__":
   tf.app.run()
