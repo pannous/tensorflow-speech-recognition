@@ -19,3 +19,7 @@ We disagree: There is plenty of training data (100GB [here](http://www.openslr.o
 **Collaborators wanted!** We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party, no matter your background.
 
 We are still in the **planning phase**! See [train.py](https://github.com/pannous/tensorflow-speech-recognition/blob/master/train.py) for the suggested general architecture. You can contribute right away by discussing or implementing one of the (easy) train_... methods. It is important that we have a mechanism to persist and load subsets of the whole model, and to make it extensible on demand. So far the Graph.load and Saver.load mechanisms are insufficient for that. 
+
+**Fun tasks for newcomers**
+* Data Augmentation :  create on-the-fly modulation for our data: increase the speech frequency, add background noise, alter the pitch etc,...
+* Create a matrix auto encoder:  the current autoencoder takes a vector as input. each of the easy to add one dimension to autoencode spectrograph files preserving the axis information.
