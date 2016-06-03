@@ -3,7 +3,7 @@ Speech recognition using google's [tensorflow](https://github.com/tensorflow/ten
 
 Replaces [caffe-speech-recognition](https://github.com/pannous/caffe-speech-recognition), see there for training data.
 
-Update: [Sphinx is now using tensorflow LSTMs](https://github.com/cmusphinx/g2p-seq2seq)
+Update: [Sphinx starts using tensorflow LSTMs](http://cmusphinx.sourceforge.net/)
 
 **Extensions** to current tensorflow probably needed:
 
