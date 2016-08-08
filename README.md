@@ -17,8 +17,7 @@ We disagree: There is plenty of training data (100GB [here](http://www.openslr.o
 
 
 Update: Nervana [showed](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build models that are state of the art. Unfortunately they didn't open source the software.
-[Sphinx starts using tensorflow LSTMs](http://cmusphinx.sourceforge.net/), is it still (deliberately?) impossible to set up?
-
+[Sphinx starts using tensorflow LSTMs](http://cmusphinx.sourceforge.net/).
 
 **Collaborators wanted!** We are in the process of tackling this project in seriousness. Make a pull request if you want to join the party, no matter your background.
 
