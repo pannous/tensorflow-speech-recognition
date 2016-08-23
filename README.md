@@ -24,6 +24,8 @@ Update: Nervana [showed](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is
 We are still in the **planning phase**! See [train.py](https://github.com/pannous/tensorflow-speech-recognition/blob/master/train.py) for the suggested general architecture. You can contribute right away by discussing or implementing one of the (easy) train_... methods.
 
 ** Getting started **
+`./number_classifier_tflearn.py`
+`./speaker_classifier_tflearn.py`
 `./train.sh`
 `./record.py`
 
