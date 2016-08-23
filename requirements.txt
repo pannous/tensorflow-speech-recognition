@@ -4,6 +4,7 @@ scikit-image
 
 #optional
 pyaudio
+# cv,cv2 #  deprecated, we use matplotlib.pyplot now
 matplotlib 
 wave
-tflearn
+tflearn 
