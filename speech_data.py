@@ -298,3 +298,10 @@ def read_data_sets(train_dir, fake_data=False, one_hot=True):
   data_sets.test = DataSet(test_images, test_labels, load=True)
 
   return data_sets
+
+if __name__ == "__main__":
+  print("downloading speech datasets")
+  maybe_download( SOURCE_URL + DIGIT_SPECTROS)
+  maybe_download( SOURCE_URL + DIGIT_WAVES)
+  maybe_download( SOURCE_URL + NUMBER_IMAGES)
+  maybe_download( SOURCE_URL + NUMBER_WAVES)
