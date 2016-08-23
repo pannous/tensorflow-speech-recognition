@@ -1,7 +1,7 @@
 """A simple speech classifer AND autoencoder
 
 1st step : classify+encode the spectogram of 10 spoken digits into one-hot-vector + 'flavor'-vector of size 10
-The 'flavor' vector is meant to hold voice characteristics orthogonal to the number information: gender, speed, pitch, ...
+The 'flavor' vector is meant to hold voice characteristics orthogonal to the 'number' information: gender, speed, pitch, ...
 
 INPUT: spectogram
 ENCODED: classifed digit + flavor
@@ -17,7 +17,7 @@ import sys
 import tensorflow as tf
 sess = tf.InteractiveSession()
 import speech_data
-speech = speech_data.read_data_sets("/data/speech/", one_hot=True)
+speech = speech_data.read_data_sets("data/", one_hot=True)
 
 # width=256
 # height=256

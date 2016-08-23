@@ -23,7 +23,7 @@ DIGIT_WAVES = 'spoken_numbers_pcm.tar'
 DIGIT_SPECTROS = 'spoken_numbers_spectros_64x64.tar'
 TEST_INDEX='test_index.txt'
 TRAIN_INDEX='train_index.txt'
-DATA_DIR='data'
+DATA_DIR='data/'
 # TRAIN_INDEX='train_words_index.txt'
 # TEST_INDEX='test_words_index.txt'
 # width=256
@@ -182,7 +182,7 @@ class DataSet(object):
     if image_name in self.cache:
         return self.cache[image_name]
     else:
-      image = skimage.io.imread(image_name).astype(numpy.float32)
+      image = skimage.io.imread(DATA_DIR+ image_name).astype(numpy.float32)
       # images = numpy.multiply(images, 1.0 / 255.0)
       self.cache[image_name]=image
       return image

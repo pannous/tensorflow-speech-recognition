@@ -6,3 +6,4 @@ scikit-image
 pyaudio
 matplotlib 
 wave
+tflearn
