@@ -9,7 +9,7 @@ import numpy
 # Training Step: 544  | total loss: 0.15866
 # | Adam | epoch: 034 | loss: 0.15866 - acc: 0.9818 -- iter: 0000/1000
 
-batch=speech_data.wave_batch_generator(1000,speech_data.Target.digits)
+batch=speech_data.wave_batch_generator(10000,speech_data.Target.digits)
 X,Y=next(batch)
 
 number_classes=10 # Digits
@@ -24,9 +24,10 @@ net = tflearn.fully_connected(net, number_classes, activation='softmax')
 net = tflearn.regression(net, optimizer='adam', loss='categorical_crossentropy')
 
 model = tflearn.DNN(net)
-model.fit(X, Y,n_epoch=30,show_metric=True,snapshot_step=100)
+model.fit(X, Y,n_epoch=3,show_metric=True,snapshot_step=100)
+# Overfitting okay for now
 
-demo_file = "8_Vicki_260.wav"
+demo_file = "5_Vicki_260.wav"
 demo=speech_data.load_wav_file(speech_data.path + demo_file)
 result=model.predict([demo])
 result=numpy.argmax(result)
