@@ -199,8 +199,6 @@ if __name__ == '__main__':
   threading.Thread(target=os.system, args=["say 5"]).start();
   r=RecordThread()
   r.start()
-  # print int('8') # 8
-  # print 56==('8') # false :(
   # record()
   # upload()
   # transform_all()
