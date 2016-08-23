@@ -14,13 +14,13 @@ from six.moves import urllib
 from six.moves import xrange  # pylint: disable=redefined-builtin
 
 
-# SOURCE_URL = 'https://www.dropbox.com/s/eb5zqskvnuj0r78/spoken_words.tar?dl=0'
 # http://pannous.net/files/spoken_numbers_pcm.tar
 SOURCE_URL = 'http://pannous.net/files/' #spoken_numbers.tar'
 NUMBER_IMAGES = 'spoken_numbers.tar'
 NUMBER_WAVES = 'spoken_numbers_wav.tar'
 DIGIT_WAVES = 'spoken_numbers_pcm.tar'
 DIGIT_SPECTROS = 'spoken_numbers_spectros_64x64.tar'
+SPOKEN_WORDS = 'https://www.dropbox.com/s/eb5zqskvnuj0r78/spoken_words.tar?dl=0'
 TEST_INDEX='test_index.txt'
 TRAIN_INDEX='train_index.txt'
 DATA_DIR='data/'
@@ -31,26 +31,25 @@ DATA_DIR='data/'
 width=512 # todo: sliding window!
 height=512
 
-def maybe_download(filename, work_directory):
+def maybe_download(file, work_directory):
   """Download the data from Pannous's website, unless it's already here."""
   if not os.path.exists(work_directory):
     os.mkdir(work_directory)
-  filepath = os.path.join(work_directory, filename)
+  filepath = os.path.join(work_directory, re.sub('.*\/','',file))
   if not os.path.exists(filepath):
-    print('Downloading %s from %s to %s' % ( filename, SOURCE_URL, filepath))
-    filepath, _ = urllib.request.urlretrieve(SOURCE_URL + filename, filepath)
+    if(not file.startswith("http")):url_filename = SOURCE_URL + file
+    print('Downloading from %s to %s' % (url_filename, filepath))
+    filepath, _ = urllib.request.urlretrieve(url_filename, filepath)
     statinfo = os.stat(filepath)
-    print('Successfully downloaded', filename, statinfo.st_size, 'bytes.')
+    print('Successfully downloaded', file, statinfo.st_size, 'bytes.')
     # os.system('ln -s '+work_directory)
   # if os.path.exists(filepath):
     print('Extracting %s to %s' % ( filepath, work_directory))
     os.system('tar xf '+filepath)
   return filepath
 
-
 def spectro_batch(batch_size=10):
   return spectro_batch_generator(batch_size)
-
 
 def spectro_batch_generator(batch_size,width=64):
   height=width
@@ -78,6 +77,10 @@ class Target(Enum):  # labels
   digits=1
   speaker=2
   words_per_minute=3
+  word_phonemes=4
+  word=5#characters=5
+  sentence=6
+  sentiment=7
 
 
 pcm_path = "data/spoken_numbers_pcm/" # 8 bit
@@ -108,6 +111,27 @@ def load_wav_file(name):
   chunk = chunk[0:CHUNK * 2]  # should be enough for now -> cut
   chunk.extend(numpy.zeros(CHUNK * 2 - len(chunk)))  # fill with padding 0's
   return chunk
+
+def word_batch_generator(batch_size=10,target=Target.word):
+  maybe_download(SPOKEN_WORDS, DATA_DIR)
+  batch_waves = []
+  labels = []
+  # input_width=CHUNK*6 # wow, big!!
+  speakers=get_speakers()
+  files = os.listdir(path)
+  while True:
+    shuffle(files)
+    for wav in files:
+      if not wav.endswith(".png"):continue
+      if target==Target.digits: labels.append(dense_to_one_hot(int(wav[0])))
+      if target==Target.speaker: labels.append(one_hot_from_item(speaker(wav), speakers))
+      chunk = load_wav_file(path+wav)
+      batch_waves.append(chunk)
+      # batch_waves.append(chunks[input_width])
+      if len(batch_waves) >= batch_size:
+        yield batch_waves, labels
+        batch_waves = []  # Reset for next batch
+        labels = []
 
 # If you set dynamic_pad=True when calling tf.train.batch the returned batch will be automatically padded with 0s. Handy! A lower-level option is to use tf.PaddingFIFOQueue.
 # only apply to a subset of all images at one time
