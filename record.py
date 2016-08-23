@@ -112,22 +112,10 @@ def record():
         plt.matshow(image, fignum=1)
         plt.draw()
         plt.pause(0.01)
-        # r = numpy.empty(length)
-        # cv2.imshow(winName,image)
-        # result=upload(image)
-        # p=re.compile("(\\d)")
-        # result=p.search(result).group(1)
+        # result=spec2word(image) #todo: reconnect
         # subprocess.call(["say"," %s"%result])
-
-        # cv2.imwrite('RandomGray%d.png'%i,image)
+        # cv2.imshow(winName,image)
         # if cv2.waitKey(10) == 27: BREAKS portAudio !!
 
-
 if __name__ == '__main__':
-  # cv2.imshow(winName,image )
-  # RecordThread().start()
   record()
-  # upload()
-  # transform_all()
-  # cv2.waitKey()
-  # plt.show()
