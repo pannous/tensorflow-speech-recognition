@@ -50,12 +50,12 @@ FLAGS = tf.app.flags.FLAGS
 
 
 def train_all():
-  #  while each of these methods can be implemented separately,
+  # while each of these methods can be implemented separately,
   # it is important that they operate on (subsets of) the same model!
   
   # also it is important that progress to the model will be uploaded,
   # so that the community constantly improves the model,
-  # even if one individual can only contribute the processing power of i.e. one GPU/night
+  # even if one individual can only contribute the processing power of one GPU/night
   while true:
     # train_autoencoder()  # wave -> wave
     train_spectrogram_encoder() # spectrogram -> vector
