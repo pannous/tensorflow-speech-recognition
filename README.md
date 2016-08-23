@@ -1,7 +1,7 @@
 # Tensorflow Speech Recognition
 Speech recognition using google's [tensorflow](https://github.com/tensorflow/tensorflow/) deep learning framework, [sequence-to-sequence](https://www.tensorflow.org/versions/master/tutorials/seq2seq/index.html) neural networks.
 
-Replaces [caffe-speech-recognition](https://github.com/pannous/caffe-speech-recognition), see there for training data.
+Replaces [caffe-speech-recognition](https://github.com/pannous/caffe-speech-recognition), see there for some background.
 
 **Extensions** to current tensorflow probably needed:
 
