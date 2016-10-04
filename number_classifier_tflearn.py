@@ -9,7 +9,7 @@ import numpy
 # Training Step: 544  | total loss: 0.15866
 # | Adam | epoch: 034 | loss: 0.15866 - acc: 0.9818 -- iter: 0000/1000
 
-batch=speech_data.wave_batch_generator(10000,speech_data.Target.digits)
+batch=speech_data.wave_batch_generator(10000,target=speech_data.Target.digits)
 X,Y=next(batch)
 
 number_classes=10 # Digits

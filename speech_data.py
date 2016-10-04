@@ -4,7 +4,7 @@
 import gzip
 import os
 import re
-import skimage.io # scikit-image
+# import skimage.io # scikit-image
 import numpy
 import numpy as np
 import wave
@@ -33,6 +33,7 @@ height=512
 
 def maybe_download(file, work_directory):
   """Download the data from Pannous's website, unless it's already here."""
+  print("Downloading %s to %s"%(file,work_directory))
   if not os.path.exists(work_directory):
     os.mkdir(work_directory)
   filepath = os.path.join(work_directory, re.sub('.*\/','',file))
@@ -93,7 +94,9 @@ def speaker(wav):  # vom Dateinamen
 
 def get_speakers():
   files = os.listdir(pcm_path)
-  return list(set(map(speaker,files)))
+  speakers=list(set(map(speaker,files)))
+  print(len(speakers)," speakers: ",speakers)
+  return speakers
 
 def load_wav_file(name):
   f = wave.open(name, "rb")
@@ -135,12 +138,12 @@ def word_batch_generator(batch_size=10,target=Target.word):
 
 # If you set dynamic_pad=True when calling tf.train.batch the returned batch will be automatically padded with 0s. Handy! A lower-level option is to use tf.PaddingFIFOQueue.
 # only apply to a subset of all images at one time
-def wave_batch_generator(batch_size=10,target=Target.speaker):
-  maybe_download(DIGIT_WAVES, DATA_DIR)
+def wave_batch_generator(batch_size=10,source=DIGIT_WAVES,target=Target.digits): #speaker
+  maybe_download(source, DATA_DIR)
+  if target == Target.speaker: speakers=get_speakers()
   batch_waves = []
   labels = []
   # input_width=CHUNK*6 # wow, big!!
-  speakers=get_speakers()
   files = os.listdir(path)
   while True:
     shuffle(files)

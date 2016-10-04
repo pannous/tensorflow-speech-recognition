@@ -16,10 +16,10 @@ Some people say we have the models but not enough training data.
 We disagree: There is plenty of training data (100GB [here](http://www.openslr.org/12), on Gutenberg, synthetic Text to Speech snippets, Movies with transcripts, YouTube with captions etc etc) we just need a simple yet powerful model. It's only a question of time...
 
 
-Update: Nervana [showed](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build models that are state of the art. Unfortunately they didn't open source the software.
+Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build models that are state of the art. Unfortunately they didn't open source the software.
 [Sphinx starts using tensorflow LSTMs](http://cmusphinx.sourceforge.net/).
 
-**Collaborators wanted!** We are in the process of tackling this project in seriousness. Make a pull request if you want to join the party, no matter your background.
+**Collaborators wanted!** We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party, no matter your background.
 
 We are still in the **planning phase**! See [train.py](https://github.com/pannous/tensorflow-speech-recognition/blob/master/train.py) for the suggested general architecture. You can contribute right away by discussing or implementing one of the (easy) train_... methods.
 
