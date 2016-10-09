@@ -19,13 +19,6 @@ def simple_dense(net): # best with lr ~0.001
 	# net.classifier() # auto classes from labels
 	return
 
-def denseConv(net):
-	# type: (layer.net) -> None
-	print("Building dense-net")
-	net.reshape(shape=[-1, 64, 64, 1])  # Reshape input picture
-	net.buildDenseConv()
-	net.classifier() # auto classes from labels
-
 def alex(net): # kinda
 	# type: (layer.net) -> None
 	print("Building Alex-net")
@@ -39,15 +32,26 @@ def alex(net): # kinda
 	net.dense(1024,activation=tf.nn.relu)
 	net.dense(1024,activation=tf.nn.relu)
 
+
+def denseConv(net):
+	# type: (layer.net) -> None
+	print("Building dense-net")
+	net.reshape(shape=[-1, 64, 64, 1])  # Reshape input picture
+	net.buildDenseConv()
+	net.classifier() # auto classes from labels
+
+
 batch=speech_data.spectro_batch_generator(1000,target=speech_data.Target.digits)
 X,Y=next(batch)
 
-net=layer.net(simple_dense, input_width=64*64,output_width=10, learning_rate=0.01)
-# net=layer.net(alex,input_width=64*64,output_width=10, learning_rate=0.001)
+# CHOSE MODEL ARCHITECTURE HERE:
+net=layer.net(model=simple_dense, input_width=64*64,output_width=10, learning_rate=0.01)
+# net=layer.net(model=alex,input_width=64*64,output_width=10, learning_rate=0.001)
+# net=layer.net(model=denseConv,input_width=64*64,output_width=10, learning_rate=0.001)
 
 net.train(data=batch,batch_size=10,steps=500,dropout=0.6,display_step=1,test_step=1) # debug
 # net.train(data=batch,batch_size=10,steps=5000,dropout=0.6,display_step=5,test_step=20) # test
-# net.train(data=batch,batch_size=10,steps=5000,dropout=0.6,display_step=5,test_step=100) # run
+# net.train(data=batch,batch_size=10,steps=5000,dropout=0.6,display_step=10,test_step=100) # run
 
 # net.predict() # nil=random
 # net.generate(3)  # nil=random
