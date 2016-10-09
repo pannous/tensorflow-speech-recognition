@@ -20,7 +20,7 @@ NUMBER_IMAGES = 'spoken_numbers.tar'
 NUMBER_WAVES = 'spoken_numbers_wav.tar'
 DIGIT_WAVES = 'spoken_numbers_pcm.tar'
 DIGIT_SPECTROS = 'spoken_numbers_spectros_64x64.tar'
-SPOKEN_WORDS = 'https://www.dropbox.com/s/eb5zqskvnuj0r78/spoken_words.tar?dl=0'
+SPOKEN_WORDS = 'https://dl.dropboxusercontent.com/u/23615316/spoken_words.tar'
 TEST_INDEX='test_index.txt'
 TRAIN_INDEX='train_index.txt'
 DATA_DIR='data/'
@@ -33,7 +33,7 @@ height=512
 
 def maybe_download(file, work_directory):
   """Download the data from Pannous's website, unless it's already here."""
-  print("Downloading %s to %s"%(file,work_directory))
+  print("Looking for data %s in %s"%(file,work_directory))
   if not os.path.exists(work_directory):
     os.mkdir(work_directory)
   filepath = os.path.join(work_directory, re.sub('.*\/','',file))
@@ -247,7 +247,7 @@ class DataSet(object):
 # multi-label
 def dense_to_some_hot(labels_dense, num_classes=140):
   """Convert class labels from int vectors to many-hot vectors!"""
-  pass
+  raise "TODO dense_to_some_hot"
 
 
 def one_hot_to_item(hot, items):
