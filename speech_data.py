@@ -4,7 +4,7 @@
 import gzip
 import os
 import re
-# import skimage.io # scikit-image
+import skimage.io # scikit-image
 import numpy
 import numpy as np
 import wave
@@ -13,65 +13,25 @@ from random import shuffle
 from six.moves import urllib
 from six.moves import xrange  # pylint: disable=redefined-builtin
 
-
-# http://pannous.net/files/spoken_numbers_pcm.tar
-SOURCE_URL = 'http://pannous.net/files/' #spoken_numbers.tar'
-NUMBER_IMAGES = 'spoken_numbers.tar'
-NUMBER_WAVES = 'spoken_numbers_wav.tar'
-DIGIT_WAVES = 'spoken_numbers_pcm.tar'
-DIGIT_SPECTROS = 'spoken_numbers_spectros_64x64.tar'
-SPOKEN_WORDS = 'https://dl.dropboxusercontent.com/u/23615316/spoken_words.tar'
-TEST_INDEX='test_index.txt'
-TRAIN_INDEX='train_index.txt'
-DATA_DIR='data/'
 # TRAIN_INDEX='train_words_index.txt'
 # TEST_INDEX='test_words_index.txt'
-# width=256
-# height=256
-width=512 # todo: sliding window!
-height=512
+SOURCE_URL = 'http://pannous.net/files/' #spoken_numbers.tar'
+DATA_DIR = 'data/'
+pcm_path = "data/spoken_numbers_pcm/" # 8 bit
+wav_path = "data/spoken_numbers_wav/" # 16 bit s16le
+path = pcm_path
+CHUNK = 4096
+test_fraction=0.1 # 10% of data for test / verification
 
-def maybe_download(file, work_directory):
-  """Download the data from Pannous's website, unless it's already here."""
-  print("Looking for data %s in %s"%(file,work_directory))
-  if not os.path.exists(work_directory):
-    os.mkdir(work_directory)
-  filepath = os.path.join(work_directory, re.sub('.*\/','',file))
-  if not os.path.exists(filepath):
-    if(not file.startswith("http")):url_filename = SOURCE_URL + file
-    print('Downloading from %s to %s' % (url_filename, filepath))
-    filepath, _ = urllib.request.urlretrieve(url_filename, filepath)
-    statinfo = os.stat(filepath)
-    print('Successfully downloaded', file, statinfo.st_size, 'bytes.')
-    # os.system('ln -s '+work_directory)
-  # if os.path.exists(filepath):
-    print('Extracting %s to %s' % ( filepath, work_directory))
-    os.system('tar xf '+filepath)
-  return filepath
-
-def spectro_batch(batch_size=10):
-  return spectro_batch_generator(batch_size)
-
-def spectro_batch_generator(batch_size,width=64):
-  height=width
-  batch = []
-  labels = []
-  # path = "data/spoken_numbers/"
-  path = "data/spoken_numbers_64x64/"
-  files=os.listdir(path)
-  while True:
-    shuffle(files)
-    for image_name in files:
-      image = skimage.io.imread(path+image_name).astype(numpy.float32)
-      # image.resize(width,height) # lets see ...
-      data = image/255. # 0-1 for Better convergence
-      data = data.reshape([width*height]) # tensorflow matmul needs flattened matrices wtf
-      batch.append(list(data))
-      labels.append(dense_to_one_hot(int(image_name[0])))
-      if len(batch) >= batch_size:
-        yield batch, labels
-        batch = []  # Reset for next batch
-        labels = []
+# http://pannous.net/files/spoken_numbers_pcm.tar
+class Source:  # labels
+  NUMBER_WAVES = 'spoken_numbers_wav.tar'
+  DIGIT_WAVES = 'spoken_numbers_pcm.tar'
+  DIGIT_SPECTROS = 'spoken_numbers_spectros_64x64.tar'  # 64x64  baby data set, works astonishingly well
+  NUMBER_IMAGES = 'spoken_numbers.tar'  # width=256 height=256
+  SPOKEN_WORDS = 'https://dl.dropboxusercontent.com/u/23615316/spoken_words.tar'  # width=512  height=512# todo: sliding window!
+  TEST_INDEX = 'test_index.txt'
+  TRAIN_INDEX = 'train_index.txt'
 
 from enum import Enum
 class Target(Enum):  # labels
@@ -84,17 +44,38 @@ class Target(Enum):  # labels
   sentiment=7
 
 
-pcm_path = "data/spoken_numbers_pcm/" # 8 bit
-wav_path = "data/spoken_numbers_wav/" # 16 bit s16le
-path = pcm_path
-CHUNK = 4096
+def maybe_download(file, work_directory):
+  """Download the data from Pannous's website, unless it's already here."""
+  print("Looking for data %s in %s"%(file,work_directory))
+  if not os.path.exists(work_directory):
+    os.mkdir(work_directory)
+  filepath = os.path.join(work_directory, re.sub('.*\/','',file))
+  if not os.path.exists(filepath):
+    if not file.startswith("http"): url_filename = SOURCE_URL + file
+    else: url_filename=file
+    print('Downloading from %s to %s' % (url_filename, filepath))
+    filepath, _ = urllib.request.urlretrieve(url_filename, filepath)
+    statinfo = os.stat(filepath)
+    print('Successfully downloaded', file, statinfo.st_size, 'bytes.')
+    # os.system('ln -s '+work_directory)
+  if os.path.exists(filepath):
+    print('Extracting %s to %s' % ( filepath, work_directory))
+    os.system('tar xf '+filepath)
+  return filepath.replace(".tar","")
 
-def speaker(wav):  # vom Dateinamen
-  return re.sub(r'_.*', '', wav[2:])
+def spectro_batch(batch_size=10):
+  return spectro_batch_generator(batch_size)
 
-def get_speakers():
-  files = os.listdir(pcm_path)
-  speakers=list(set(map(speaker,files)))
+def speaker(file):  # vom Dateinamen
+  # if not "_" in file:
+  #   return "Unknown"
+  return file.split("_")[1]
+
+def get_speakers(path=pcm_path):
+  files = os.listdir(path)
+  def nobad(file):
+    return "_" in file and not "." in file.split("_")[1]
+  speakers=list(set(map(speaker,filter(nobad,files))))
   print(len(speakers)," speakers: ",speakers)
   return speakers
 
@@ -115,30 +96,40 @@ def load_wav_file(name):
   chunk.extend(numpy.zeros(CHUNK * 2 - len(chunk)))  # fill with padding 0's
   return chunk
 
-def word_batch_generator(batch_size=10,target=Target.word):
-  maybe_download(SPOKEN_WORDS, DATA_DIR)
-  batch_waves = []
+
+def spectro_batch_generator(batch_size=10,width=64,source_data=Source.DIGIT_SPECTROS,target=Target.digits):
+  # maybe_download(Source.NUMBER_IMAGES , DATA_DIR)
+  # maybe_download(Source.SPOKEN_WORDS, DATA_DIR)
+  path=maybe_download(source_data, DATA_DIR)
+  path=path.replace("_spectros","")# HACK! remove!
+  height = width
+  batch = []
   labels = []
-  # input_width=CHUNK*6 # wow, big!!
-  speakers=get_speakers()
+  speakers=get_speakers(path)
   files = os.listdir(path)
+  # shuffle(files) # todo : split test_fraction batch here!
+  files=files[0:int(len(files)*(1-test_fraction))]
+  print("Got %d source data files from %s"%(len(files),path))
   while True:
+    # print("shuffling source data files")
     shuffle(files)
-    for wav in files:
-      if not wav.endswith(".png"):continue
-      if target==Target.digits: labels.append(dense_to_one_hot(int(wav[0])))
-      if target==Target.speaker: labels.append(one_hot_from_item(speaker(wav), speakers))
-      chunk = load_wav_file(path+wav)
-      batch_waves.append(chunk)
-      # batch_waves.append(chunks[input_width])
-      if len(batch_waves) >= batch_size:
-        yield batch_waves, labels
-        batch_waves = []  # Reset for next batch
+    for image_name in files:
+      if not "_" in image_name: continue # bad !?!
+      image = skimage.io.imread(path + "/" + image_name).astype(numpy.float32)
+      # image.resize(width,height) # lets see ...
+      data = image / 255.  # 0-1 for Better convergence
+      data = data.reshape([width * height])  # tensorflow matmul needs flattened matrices wtf
+      batch.append(list(data))
+      labels.append(dense_to_one_hot(int(image_name[0])))
+      if len(batch) >= batch_size:
+        yield batch, labels
+        batch = []  # Reset for next batch
         labels = []
+
 
 # If you set dynamic_pad=True when calling tf.train.batch the returned batch will be automatically padded with 0s. Handy! A lower-level option is to use tf.PaddingFIFOQueue.
 # only apply to a subset of all images at one time
-def wave_batch_generator(batch_size=10,source=DIGIT_WAVES,target=Target.digits): #speaker
+def wave_batch_generator(batch_size=10,source=Source.DIGIT_WAVES,target=Target.digits): #speaker
   maybe_download(source, DATA_DIR)
   if target == Target.speaker: speakers=get_speakers()
   batch_waves = []
@@ -292,43 +283,33 @@ def extract_images(names_file,train):
   return image_files
 
 
-def read_data_sets(train_dir, fake_data=False, one_hot=True):
+def read_data_sets(train_dir,source_data=Source.NUMBER_IMAGES, fake_data=False, one_hot=True):
   class DataSets(object):
     pass
   data_sets = DataSets()
-
   if fake_data:
     data_sets.train = DataSet([], [], fake_data=True, one_hot=one_hot)
     data_sets.validation = DataSet([], [], fake_data=True, one_hot=one_hot)
     data_sets.test = DataSet([], [], fake_data=True, one_hot=one_hot)
     return data_sets
-
   VALIDATION_SIZE = 2000
-
-  local_file = maybe_download(NUMBER_IMAGES, train_dir)
+  local_file = maybe_download(source_data, train_dir)
   train_images = extract_images(TRAIN_INDEX,train=True)
   train_labels = extract_labels(TRAIN_INDEX,train=True, one_hot=one_hot)
   test_images = extract_images(TEST_INDEX,train=False)
   test_labels = extract_labels(TEST_INDEX,train=False, one_hot=one_hot)
-
-  # validation_images = train_images[:VALIDATION_SIZE]
-  # validation_labels = train_labels[:VALIDATION_SIZE]
-  # train_images = train_images[VALIDATION_SIZE:]
-  # train_labels = train_labels[VALIDATION_SIZE:]
-  # validation_images = test_images[:VALIDATION_SIZE]
-  # validation_labels = test_labels[:VALIDATION_SIZE]
-  test_images = test_images[VALIDATION_SIZE:]
-  test_labels = test_labels[VALIDATION_SIZE:]
-
+  # train_images = train_images[:VALIDATION_SIZE]
+  # train_labels = train_labels[:VALIDATION_SIZE:]
+  # test_images = test_images[VALIDATION_SIZE:]
+  # test_labels = test_labels[VALIDATION_SIZE:]
   data_sets.train = DataSet(train_images, train_labels , load=False)
-  # data_sets.validation = DataSet(validation_images, validation_labels, load=True)
   data_sets.test = DataSet(test_images, test_labels, load=True)
-
+  # data_sets.validation = DataSet(validation_images, validation_labels, load=True)
   return data_sets
 
 if __name__ == "__main__":
   print("downloading speech datasets")
-  maybe_download( SOURCE_URL + DIGIT_SPECTROS)
-  maybe_download( SOURCE_URL + DIGIT_WAVES)
-  maybe_download( SOURCE_URL + NUMBER_IMAGES)
-  maybe_download( SOURCE_URL + NUMBER_WAVES)
+  maybe_download( Source.DIGIT_SPECTROS)
+  maybe_download( Source.DIGIT_WAVES)
+  maybe_download( Source.NUMBER_IMAGES)
+  maybe_download( Source.NUMBER_WAVES)
