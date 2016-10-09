@@ -10,6 +10,7 @@ We disagree: There is plenty of training data (100GB [here](http://www.openslr.o
 
 
 ![Sample spectrogram, That's what she said, too laid?](https://raw.githubusercontent.com/pannous/caffe-speech-recognition/master/0_Karen_160.png)
+
 Sample spectrogram, Karen uttering 'zero' with 160 words per minute.
 
 **Partners + Collaborators wanted!** We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party, no matter your background.
