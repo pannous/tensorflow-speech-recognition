@@ -13,17 +13,18 @@ We disagree: There is plenty of training data (100GB [here](http://www.openslr.o
 
 Sample spectrogram, Karen uttering 'zero' with 160 words per minute.
 
-**Partners + Collaborators wanted!** We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party, no matter your background.
+**Partners + Collaborators wanted** 
+We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party, no matter your background.
 
 Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build models that are state of the art. Unfortunately they didn't open source the software.
 [Sphinx starts using tensorflow LSTMs](http://cmusphinx.sourceforge.net/).
 
-** Getting started **
+**Getting started**
 Toy examples:
 `./number_classifier_tflearn.py`
 `./speaker_classifier_tflearn.py`
 
-Some architectures:
+Some less trivial architectures:
 `./densenet_layer.py`
 
 Later:
