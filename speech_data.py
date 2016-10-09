@@ -42,6 +42,7 @@ class Target(Enum):  # labels
   word=5#characters=5
   sentence=6
   sentiment=7
+  first_letter=8
 
 
 def maybe_download(file, work_directory):
@@ -106,9 +107,11 @@ def spectro_batch_generator(batch_size=10,width=64,source_data=Source.DIGIT_SPEC
   batch = []
   labels = []
   speakers=get_speakers(path)
+  if target==Target.digits: num_classes=10
+  if target==Target.first_letter: num_classes=74 #32
   files = os.listdir(path)
   # shuffle(files) # todo : split test_fraction batch here!
-  files=files[0:int(len(files)*(1-test_fraction))]
+  # files=files[0:int(len(files)*(1-test_fraction))]
   print("Got %d source data files from %s"%(len(files),path))
   while True:
     # print("shuffling source data files")
@@ -120,7 +123,9 @@ def spectro_batch_generator(batch_size=10,width=64,source_data=Source.DIGIT_SPEC
       data = image / 255.  # 0-1 for Better convergence
       data = data.reshape([width * height])  # tensorflow matmul needs flattened matrices wtf
       batch.append(list(data))
-      labels.append(dense_to_one_hot(int(image_name[0])))
+      # classe=(ord(image_name[0]) - 48)  # -> 0=0 .. A:65-48 ... 74 for 'z'
+      classe = (ord(image_name[0]) - 48) % 32# -> 0=0  17 for A, 10 for z ;)
+      labels.append(dense_to_one_hot(classe,num_classes))
       if len(batch) >= batch_size:
         yield batch, labels
         batch = []  # Reset for next batch
