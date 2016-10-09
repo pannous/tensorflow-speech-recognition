@@ -48,6 +48,7 @@ class net():
 			self.input_width=input_width
 			self.last_width=self.input_width
 			self.output_width=output_width
+			self.num_classes=output_width
 			# self.data=data # assigned to self.x=net.input via train
 			# self.batch_size=batch_size
 			self.layers=[]
@@ -249,7 +250,8 @@ class net():
 			print("output shape ",conv1.get_shape())
 			self.add(conv1)
 
-	def classifier(self,classes=10):  # Define loss and optimizer
+	def classifier(self,classes=0):  # Define loss and optimizer
+		if not classes: classes=self.num_classes
 		with tf.name_scope('prediction'):# prediction
 			if self.last_width!=classes:
 				# print("Automatically adding dense prediction")

@@ -3,6 +3,7 @@
 import tensorflow as tf
 import layer
 import speech_data
+from speech_data import Source,Target
 from layer import net
 
 
@@ -41,11 +42,17 @@ def denseConv(net):
 	net.classifier() # auto classes from labels
 
 
-batch=speech_data.spectro_batch_generator(1000,target=speech_data.Target.digits)
+# width=64 # for pcm baby data
+# batch=speech_data.spectro_batch_generator(1000,target=speech_data.Target.digits)
+# classes=10
+
+width=512 # for spoken_words overkill data
+classes=74 #
+batch=word_batch=speech_data.spectro_batch_generator(10,width,source_data=Source.SPOKEN_WORDS, target=Target.first_letter)
 X,Y=next(batch)
 
 # CHOSE MODEL ARCHITECTURE HERE:
-net=layer.net(model=simple_dense, input_width=64*64,output_width=10, learning_rate=0.01)
+net=layer.net(simple_dense, width*width, classes, learning_rate=0.01)
 # net=layer.net(model=alex,input_width=64*64,output_width=10, learning_rate=0.001)
 # net=layer.net(model=denseConv,input_width=64*64,output_width=10, learning_rate=0.001)
 
