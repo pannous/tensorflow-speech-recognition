@@ -108,7 +108,7 @@ def spectro_batch_generator(batch_size=10,width=64,source_data=Source.DIGIT_SPEC
   labels = []
   speakers=get_speakers(path)
   if target==Target.digits: num_classes=10
-  if target==Target.first_letter: num_classes=74 #32
+  if target==Target.first_letter: num_classes=32
   files = os.listdir(path)
   # shuffle(files) # todo : split test_fraction batch here!
   # files=files[0:int(len(files)*(1-test_fraction))]

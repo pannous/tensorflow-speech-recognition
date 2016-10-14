@@ -29,7 +29,7 @@ Later:
 ![Sample spectrogram or record.py](spectrogram.demo.png)
 
 ## Partners + collaborators wanted
-We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party, no matter your background.
+We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party.
 
 Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build models that are state of the art. Unfortunately they didn't open source the software.
 [Sphinx starts using tensorflow LSTMs](http://cmusphinx.sourceforge.net/).
