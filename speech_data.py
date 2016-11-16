@@ -3,6 +3,7 @@
 
 import gzip
 import os
+import sys
 import re
 import skimage.io # scikit-image
 import numpy
@@ -45,6 +46,18 @@ class Target(Enum):  # labels
   first_letter=8
 
 
+def progresshook(blocknum, blocksize, totalsize):
+    readsofar = blocknum * blocksize
+    if totalsize > 0:
+        percent = readsofar * 1e2 / totalsize
+        s = "\r%5.1f%% %*d / %d" % (
+            percent, len(str(totalsize)), readsofar, totalsize)
+        sys.stderr.write(s)
+        if readsofar >= totalsize: # near the end
+            sys.stderr.write("\n")
+    else: # total size is unknown
+        sys.stderr.write("read %d\n" % (readsofar,))
+
 def maybe_download(file, work_directory):
   """Download the data from Pannous's website, unless it's already here."""
   print("Looking for data %s in %s"%(file,work_directory))
@@ -55,7 +68,7 @@ def maybe_download(file, work_directory):
     if not file.startswith("http"): url_filename = SOURCE_URL + file
     else: url_filename=file
     print('Downloading from %s to %s' % (url_filename, filepath))
-    filepath, _ = urllib.request.urlretrieve(url_filename, filepath)
+    filepath, _ = urllib.request.urlretrieve(url_filename, filepath,progresshook)
     statinfo = os.stat(filepath)
     print('Successfully downloaded', file, statinfo.st_size, 'bytes.')
     # os.system('ln -s '+work_directory)
