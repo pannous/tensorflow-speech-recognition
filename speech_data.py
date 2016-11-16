@@ -62,6 +62,7 @@ def maybe_download(file, work_directory):
   if os.path.exists(filepath):
     print('Extracting %s to %s' % ( filepath, work_directory))
     os.system('tar xf '+filepath)
+    print('Data ready!')
   return filepath.replace(".tar","")
 
 def spectro_batch(batch_size=10):
@@ -82,9 +83,10 @@ def get_speakers(path=pcm_path):
 
 def load_wav_file(name):
   f = wave.open(name, "rb")
+  # print("loading %s"%name)
   chunk = []
   data0 = f.readframes(CHUNK)
-  while data0 != '':  # f.getnframes()
+  while data0:  # f.getnframes()
     # data=numpy.fromstring(data0, dtype='float32')
     # data = numpy.fromstring(data0, dtype='uint16')
     data = numpy.fromstring(data0, dtype='uint8')
@@ -95,6 +97,7 @@ def load_wav_file(name):
   # finally trim:
   chunk = chunk[0:CHUNK * 2]  # should be enough for now -> cut
   chunk.extend(numpy.zeros(CHUNK * 2 - len(chunk)))  # fill with padding 0's
+  # print("%s loaded"%name)
   return chunk
 
 
@@ -151,6 +154,7 @@ def wave_batch_generator(batch_size=10,source=Source.DIGIT_WAVES,target=Target.d
       batch_waves.append(chunk)
       # batch_waves.append(chunks[input_width])
       if len(batch_waves) >= batch_size:
+        print("loaded batch of %d files"%len(files))
         yield batch_waves, labels
         batch_waves = []  # Reset for next batch
         labels = []

@@ -1,16 +1,16 @@
-MODIFIED 'personal' MIT License 
+MODIFIED 'Personal' GPL https://www.gnu.org/licenses/gpl-3.0-standalone.html
+
+"Person" here means individual, not organization nor individual acting on behalf of an organization.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish and/or distribute copies of the Software subject to the following conditions:
 
-1) The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-2) The person is not acting on behalf of a Corporation with more than 3 employees
+1) This copyright notice and this permission notice shall be included in all copies of the Software and its derivatives.
+2) The person is not acting on behalf of an Organization
 
-All other Corporations using this software in any way need to obtain a license from info@pannous.com
-The license can be expected to be free of charge if the project in which the Software is used is itself open source.
+All other organizations using this Software in any way need to obtain a license from info@pannous.com
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
