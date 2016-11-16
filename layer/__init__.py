@@ -19,8 +19,8 @@ def nop():
 	# pass
 
 
-def show_tensorboard():
-		print("run: tensorboard --debug --logdir=" + tensorboard_logs+" and navigate to http://0.0.0.0:6006")
+# def show_tensorboard():
+# 		print("run: tensorboard --debug --logdir=" + tensorboard_logs+" and navigate to http://0.0.0.0:6006")
 
 def run_tensorboard():
 		import subprocess  # NEW WAY!
@@ -29,4 +29,4 @@ def run_tensorboard():
 		subprocess.call(["open", 'http://0.0.0.0:6006'])  # async
 
 # run_tensorboard()
-show_tensorboard()
+# show_tensorboard()
