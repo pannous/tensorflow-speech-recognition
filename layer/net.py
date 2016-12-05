@@ -3,6 +3,8 @@ import tensorflow as tf
 import os
 import numpy as np
 from tensorflow.contrib.tensorboard.plugins import projector # for 3d PCA/ t-SNE
+start = int(time.time())
+
 # import input_data
 # from neural_optimizer import *
 print("tensorflow.__version__ : "+tf.__version__)
@@ -18,7 +20,8 @@ print("RUN NUMBER "+str(run_nr))
 
 # gpu = True
 gpu = False
-debug = True # summary.histogram ...
+debug = False #True # summary.histogram  : 'module' object has no attribute 'histogram' WTF
+visualize = False # NOT YET: 'ProjectorConfig' object has no attribute 'embeddings'
 slim = tf.contrib.slim
 weight_divider=10000.
 default_learning_rate=0.001
@@ -48,10 +51,10 @@ class net():
 			self.session=sess=session=tf.Session()
 			# self.session=sess=session=tf.Session(config=tf.ConfigProto(log_device_placement=True))
 			self.model=model
-			self.input_shape=input_shape or [28,28]
+			self.input_shape=input_shape or [input_width,input_width]
 			self.data=data # assigned to self.x=net.input via train
-			if not input_width or not output_width:
-				input_width,output_width=self.get_data_shape()
+			if not input_width:
+				input_width=self.get_data_shape()
 			self.input_width=input_width
 			self.last_width=self.input_width
 			self.output_width=output_width
@@ -65,10 +68,16 @@ class net():
 			self.generate_model(model)
 
 	def get_data_shape(self):
+		if self.input_shape:
+			return self.input_shape[0], self.input_shape[1]
 		try:
 			return self.data.shape[0],self.data.shape[-1]
 		except:
-			raise Exception("Data does not have shape")
+			self.data=np.array(self.data)
+			try:
+				return self.data.shape[0], self.data.shape[-1]
+			except:
+				raise Exception("Data does not have shape")
 
 	def generate_model(self,model, name=''):
 		if not model: return self
@@ -79,14 +88,16 @@ class net():
 		with tf.name_scope('data'):
 			if len(self.input_shape)==1:
 				self.input_width=self.input_shape[0]
-			if not self.input_shape or self.input_width:
+			elif self.input_shape:
+				self.x = x = self.input = tf.placeholder(tf.float32, [None, self.input_shape[0], self.input_shape[1]])
+				# todo [None, self.input_shape]
+				self.last_layer = x
+				self.last_shape = x
+			elif self.input_width:
 				self.x = x = self.target = tf.placeholder(tf.float32, [None, self.input_width])
 				self.last_layer=x
 			else:
-				self.x = x = self.input  = tf.placeholder(tf.float32, [None, self.input_shape[0],self.input_shape[1]]) # todo [None, self.input_shape]
-				self.last_layer=x
-				self.last_shape=x
-				# self.last_layer  = tf.reshape(x,[-1, self.input_width])
+				raise Exception("need input_shape or input_width by now")
 			self.y = y = self.target = tf.placeholder(tf.float32, [None, self.output_width])
 		with tf.name_scope('model'):
 			model(self)
@@ -101,7 +112,7 @@ class net():
 		return self.dense()
 
 	# Fully connected 'pyramid' layer, allows very high learning_rate >0.1 (but don't abuse)
-	def denseNet(self, hidden=20, depth=3, act=tf.nn.tanh, dropout=True,norm=None): #
+	def fullDenseNet(self, hidden=20, depth=3, act=tf.nn.tanh, dropout=True, norm=None): #
 		if(hidden>100):print("WARNING: denseNet uses quadratic mem for "+str(hidden))
 		if(depth<3):print("WARNING: did you mean to use Fully connected layer 'dense'? Expecting depth>3 vs "+str(depth))
 		inputs=self.last_layer
@@ -168,8 +179,8 @@ class net():
 		# self.add(tf.nn.SpatialConvolution(nChannels, nOutChannels, 1, 1, 1, 1, 0, 0))
 
 	# Densely Connected Convolutional Networks https://arxiv.org/abs/1608.06993
-	def buildDenseConv(self):
-		depth = 3 * 1 + 4
+	def buildDenseConv(self,N_blocks=3):
+		depth = 3 * N_blocks + 4
 		if  (depth - 4) % 3 :  raise Exception("Depth must be 3N + 4! (4,7,10,...) ")  # # layers in each denseblock
 		N = (depth - 4) / 3
 		dropRate = None # nil to disable dropout, non - zero number to enable dropout and set drop rate
@@ -228,11 +239,12 @@ class net():
 					weights = tf.Variable(tf.random_uniform([self.last_width, width], minval=-1. / width, maxval=1. / width), name="weights_dense")
 				bias = tf.Variable(tf.random_uniform([width],minval=-1./width,maxval=1./width), name="bias_dense")
 				dense1 = tf.matmul(parent, weights, name='dense_'+str(nr))+ bias
-				tf.summary.histogram('dense_'+str(nr),dense1)
-				tf.summary.histogram('weights_'+str(nr),weights)
-				tf.summary.histogram('bias_'+str(nr),bias)
-				tf.summary.histogram('dense_'+str(nr)+'/sparsity', tf.nn.zero_fraction(dense1))
-				tf.summary.histogram('weights_'+str(nr)+'/sparsity', tf.nn.zero_fraction(weights))
+				if debug:
+					tf.summary.histogram('dense_'+str(nr),dense1)
+					tf.summary.histogram('weights_'+str(nr),weights)
+					tf.summary.histogram('bias_'+str(nr),bias)
+					tf.summary.histogram('dense_'+str(nr)+'/sparsity', tf.nn.zero_fraction(dense1))
+					tf.summary.histogram('weights_'+str(nr)+'/sparsity', tf.nn.zero_fraction(weights))
 				if activation: dense1 = activation(dense1)
 				if norm: dense1 = self.norm(dense1,lsize=1)
 				if dropout: dense1 = tf.nn.dropout(dense1, self.keep_prob)
@@ -312,17 +324,17 @@ class net():
 			# Launch the graph
 
 	def next_batch(self,batch_size,session,test=False):
-		# try:
+		try:
 			if test:
 				test_images = self.data.test.images[:batch_size]
 				test_labels = self.data.test.labels[:batch_size]
 				return test_images,test_labels
 			return self.data.train.next_batch(batch_size)
-		# except:
-			# try:
-			# 	return next(self.data)
-			# except:
-			# 	return next(self.data.train)
+		except:
+			try:
+				return next(self.data)
+			except:
+				return next(self.data.train)
 
 
 	def train(self,data=0,steps=-1,dropout=None,display_step=10,test_step=200,batch_size=10): #epochs=-1,
@@ -334,14 +346,15 @@ class net():
 		# import tensorflow.contrib.layers as layers
 		# t = tf.verify_tensor_all_finite(t, msg)
 		tf.add_check_numerics_ops()
-		self.summaries = tf.summary.merge_all()
+		try: self.summaries = tf.merge_all_summaries()
+		except:self.summaries = tf.summary.merge_all()
 		self.summary_writer = tf.train.SummaryWriter(LOG_DIR, session.graph) #
 		if not dropout:dropout=1. # keep all
 		x=self.x
 		y=self.y
 		keep_prob=self.keep_prob
-		# session.run([tf.initialize_all_variables()])
-		session.run([tf.global_variables_initializer()])
+		try: session.run([tf.global_variables_initializer()])
+		except:  session.run([tf.initialize_all_variables()])
 		step = 0 # show first
 		while step < steps:
 			batch_xs, batch_ys = self.next_batch(batch_size,session)
@@ -353,11 +366,12 @@ class net():
 			loss,_= session.run([self.cost,self.optimizer], feed_dict=feed_dict)
 			if step % test_step == 0: self.test(step)
 			if step % display_step == 0:
+				seconds = int(time.time()-start)
 				# Calculate batch accuracy, loss
 				feed = {x: batch_xs, y: batch_ys, keep_prob: 1., self.train_phase: False}
 				acc , summary = session.run([self.accuracy,self.summaries], feed_dict=feed)
 				# self.summary_writer.add_summary(summary, step) # only test summaries for smoother curve
-				print("\rStep {:d} Loss= {:.6f} Accuracy= {:.3f}".format(step,loss,acc),end=' ')
+				print("\rStep {:d} Loss= {:.6f} Accuracy= {:.3f} Time= {:d}".format(step,loss,acc,seconds),end=' ')
 				if str(loss)=="nan": return print("\nLoss gradiant explosion, exiting!!!") #restore!
 			step += 1
 		print("\nOptimization Finished!")
@@ -366,18 +380,19 @@ class net():
 	def test(self,step,number=400):#256 self.batch_size
 		session=sess=self.session
 		config = projector.ProjectorConfig()
-		embedding = config.embeddings.add()  # You can add multiple embeddings. Here just one.
-		embedding.tensor_name = self.last_layer.name # last_dense
-		# embedding.tensor_path
-		# embedding.tensor_shape
-		embedding.sprite.image_path = PATH_TO_SPRITE_IMAGE
-		# help(embedding.sprite)
-		embedding.sprite.single_image_dim.extend([28, 28]) # if mnist   thumbnail
-		# embedding.single_image_dim.extend([28, 28]) # if mnist   thumbnail
-		# Link this tensor to its metadata file (e.g. labels).
-		embedding.metadata_path = os.path.join(LOG_DIR, 'metadata.tsv')
-		# Saves a configuration file that TensorBoard will read during startup.
-		projector.visualize_embeddings(self.summary_writer, config)
+		if visualize:
+			embedding = config.embeddings.add()  # You can add multiple embeddings. Here just one.
+			embedding.tensor_name = self.last_layer.name # last_dense
+			# embedding.tensor_path
+			# embedding.tensor_shape
+			embedding.sprite.image_path = PATH_TO_SPRITE_IMAGE
+			# help(embedding.sprite)
+			embedding.sprite.single_image_dim.extend([28, 28]) # if mnist   thumbnail
+			# embedding.single_image_dim.extend([28, 28]) # if mnist   thumbnail
+			# Link this tensor to its metadata file (e.g. labels).
+			embedding.metadata_path = os.path.join(LOG_DIR, 'metadata.tsv')
+			# Saves a configuration file that TensorBoard will read during startup.
+			projector.visualize_embeddings(self.summary_writer, config)
 
 		run_metadata = tf.RunMetadata()
 		run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
