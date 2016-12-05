@@ -45,3 +45,7 @@ Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that
 * Continuous densenet->seq2seq adaptation
 * Modular graphs/models + persistance
 * Incremental collaborative snapshots ('P2P learning')
+
+Even though this project is far from finished we hope it gives you some starting points.
+
+Looking for a tensorflow consultant / deep learning contractor? Reach out to info@pannous.com
