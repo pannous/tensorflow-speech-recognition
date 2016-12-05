@@ -11,7 +11,9 @@ start=int(time.time())
 display_step = 1
 test_step = 10
 save_step = 100
-learning_rate = 0.0001
+learning_rate = 0.001
+# 0.0001 Step 0 Loss= 1.976625 Accuracy= 0.250 Time= 303s loaded batch of 2402 files
+
 training_iters = 300000 #steps
 batch_size = 64
 
@@ -105,3 +107,4 @@ while step < steps:
 	if step % save_step == 0 and step > 0:
 		print("SAVING snapshot %s" % snapshot)
 		saver.save(session, "checkpoints/" + snapshot + ".ckpt", global_step)
+	step = step +1
