@@ -28,7 +28,7 @@ inputs = tf.transpose(inputs, [2, 0, 1]) # [max_time, batch_size, features] to s
 # Split data because rnn cell needs a list of inputs for the RNN inner loop
 inputs = tf.split(0, max_length, inputs)  # n_steps * (batch_size, features)
 
-num_hidden = features
+num_hidden = 200 #features
 cell = tf.nn.rnn_cell.LSTMCell(num_hidden, state_is_tuple=True)
 # rnn=tf.nn.rnn(cell,inputs)
 # rnn=tf.nn.dynamic_rnn(cell,inputs)
@@ -50,7 +50,7 @@ else:
 	y_=outputs[-1]
 
 # dense
-weights = tf.Variable(tf.random_uniform([features, classes], minval=-1. / width, maxval=1. / width), name="weights_dense")
+weights = tf.Variable(tf.random_uniform([num_hidden, classes], minval=-1. / width, maxval=1. / width), name="weights_dense")
 bias = tf.Variable(tf.random_uniform([classes], minval=-1. / width, maxval=1. / width), name="bias_dense")
 y_ = tf.matmul(y_, weights, name='dense' ) + bias
 
