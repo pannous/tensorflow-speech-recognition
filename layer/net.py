@@ -1,8 +1,11 @@
 from __future__ import print_function
 import tensorflow as tf
 import os
+import time
 import numpy as np
 from tensorboard_util import *
+from tensorflow.contrib.tensorboard.plugins import projector # for 3d PCA/ t-SNE
+start = int(time.time())
 
 # clear_tensorboard()
 set_tensorboard_run(auto_increment=True)
@@ -10,7 +13,10 @@ run_tensorboard(restart=False)
 
 # gpu = True
 gpu = False
+debug = False #True # summary.histogram  : 'module' object has no attribute 'histogram' WTF
 debug = True # histogram_summary ...
+visualize = False # NOT YET: 'ProjectorConfig' object has no attribute 'embeddings'
+
 slim = tf.contrib.slim
 weight_divider=10.
 default_learning_rate=0.001 #  mostly overwritten, so ignore it
@@ -43,10 +49,10 @@ class net():
 			self.session=sess=session=tf.Session()
 			# self.session=sess=session=tf.Session(config=tf.ConfigProto(log_device_placement=True))
 			self.model=model
-			self.input_shape=input_shape or [28,28]
+			self.input_shape=input_shape or [input_width,input_width]
 			self.data=data # assigned to self.x=net.input via train
-			if not input_width or not output_width:
-				input_width,output_width=self.get_data_shape()
+			if not input_width:
+				input_width=self.get_data_shape()
 			self.input_width=input_width
 			self.last_width=self.input_width
 			self.output_width=output_width
@@ -61,6 +67,8 @@ class net():
 			self.generate_model(model)
 
 	def get_data_shape(self):
+		if self.input_shape:
+			return self.input_shape[0], self.input_shape[1]
 		try:
 			return self.data.shape[0],self.data.shape[-1]
 		except:
@@ -75,14 +83,16 @@ class net():
 		with tf.name_scope('data'):
 			if len(self.input_shape)==1:
 				self.input_width=self.input_shape[0]
-			if not self.input_shape or self.input_width:
+			elif self.input_shape:
+				self.x = x = self.input = tf.placeholder(tf.float32, [None, self.input_shape[0], self.input_shape[1]])
+				# todo [None, self.input_shape]
+				self.last_layer = x
+				self.last_shape = x
+			elif self.input_width:
 				self.x = x = self.target = tf.placeholder(tf.float32, [None, self.input_width])
 				self.last_layer=x
 			else:
-				self.x = x = self.input  = tf.placeholder(tf.float32, [None, self.input_shape[0],self.input_shape[1]]) # todo [None, self.input_shape]
-				self.last_layer=x
-				self.last_shape=x
-				# self.last_layer  = tf.reshape(x,[-1, self.input_width])
+				raise Exception("need input_shape or input_width by now")
 			self.y = y = self.target = tf.placeholder(tf.float32, [None, self.output_width])
 		with tf.name_scope('model'):
 			model(self)
@@ -164,9 +174,8 @@ class net():
 		# self.add(tf.nn.SpatialConvolution(nChannels, nOutChannels, 1, 1, 1, 1, 0, 0))
 
 	# Densely Connected Convolutional Networks https://arxiv.org/abs/1608.06993
-	def buildDenseConv(self):
-		blocks = 2
-		depth = 3 * blocks + 4
+	def buildDenseConv(self,N_blocks=3):
+		depth = 3 * N_blocks + 4
 		if  (depth - 4) % 3 :  raise Exception("Depth must be 3N + 4! (4,7,10,...) ")  # # layers in each denseblock
 		N = (depth - 4) / 3
 		do_dropout = True# None  nil to disable dropout, non - zero number to enable dropout and set drop rate
@@ -312,17 +321,17 @@ class net():
 			# Launch the graph
 
 	def next_batch(self,batch_size,session,test=False):
-		# try:
+		try:
 			if test:
 				test_images = self.data.test.images[:batch_size]
 				test_labels = self.data.test.labels[:batch_size]
 				return test_images,test_labels
 			return self.data.train.next_batch(batch_size)
-		# except:
-			# try:
-			# 	return next(self.data)
-			# except:
-			# 	return next(self.data.train)
+		except:
+			try:
+				return next(self.data)
+			except:
+				return next(self.data.train)
 
 
 	def train(self,data=0,steps=-1,dropout=None,display_step=10,test_step=200,batch_size=10,do_resume=False): #epochs=-1,
@@ -346,8 +355,8 @@ class net():
 		if do_resume and checkpoint:
 			print("LOADING " + checkpoint+" !!!")
 			saver.restore(session, checkpoint)
-		# session.run([tf.initialize_all_variables()])
-		session.run([tf.global_variables_initializer()])
+		try: session.run([tf.global_variables_initializer()])
+		except:  session.run([tf.initialize_all_variables()])
 		step = 0 # show first
 		while step < steps:
 			batch_xs, batch_ys = self.next_batch(batch_size,session)
@@ -375,6 +384,21 @@ class net():
 
 	def test(self,step,number=400):#256 self.batch_size
 		session=sess=self.session
+		config = projector.ProjectorConfig()
+		if visualize:
+			embedding = config.embeddings.add()  # You can add multiple embeddings. Here just one.
+			embedding.tensor_name = self.last_layer.name # last_dense
+			# embedding.tensor_path
+			# embedding.tensor_shape
+			embedding.sprite.image_path = PATH_TO_SPRITE_IMAGE
+			# help(embedding.sprite)
+			embedding.sprite.single_image_dim.extend([28, 28]) # if mnist   thumbnail
+			# embedding.single_image_dim.extend([28, 28]) # if mnist   thumbnail
+			# Link this tensor to its metadata file (e.g. labels).
+			embedding.metadata_path = os.path.join(LOG_DIR, 'metadata.tsv')
+			# Saves a configuration file that TensorBoard will read during startup.
+			projector.visualize_embeddings(self.summary_writer, config)
+
 		run_metadata = tf.RunMetadata()
 		run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
 		# Calculate accuracy for 256 mnist test images
