@@ -106,5 +106,5 @@ while step < steps:
 	# if step % test_step == 0: test(step)
 	if step % save_step == 0 and step > 0:
 		print("SAVING snapshot %s" % snapshot)
-		saver.save(session, "checkpoints/" + snapshot + ".ckpt", global_step)
+		saver.save(session, "checkpoints/" + snapshot + ".ckpt", step)
 	step = step +1
