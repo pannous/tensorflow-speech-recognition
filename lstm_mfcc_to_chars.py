@@ -74,7 +74,8 @@ snapshot = "lstm_mfcc"
 checkpoint = tf.train.latest_checkpoint(checkpoint_dir="checkpoints")
 if checkpoint:
 	print("LOADING " + checkpoint + " !!!")
-	saver.restore(session, checkpoint)
+	try:saver.restore(session, checkpoint)
+	except: pass
 try: session.run([tf.global_variables_initializer()])
 except: session.run([tf.initialize_all_variables()])
 
