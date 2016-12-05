@@ -17,10 +17,9 @@ classes = 10  # digits
 batch = word_batch = speech_data.mfcc_batch_generator(batch_size)
 X, Y = next(batch)
 
-# IMDB Dataset loading
 # train, test, _ = ,X
 trainX, trainY = X, Y
-testX, testY = X, Y
+testX, testY = X, Y #overfit for now
 
 # Data preprocessing
 # Sequence padding
@@ -36,8 +35,14 @@ net = tflearn.input_data([None, width, height])
 net = tflearn.lstm(net, 128, dropout=0.8)
 net = tflearn.fully_connected(net, classes, activation='softmax')
 net = tflearn.regression(net, optimizer='adam', learning_rate=learning_rate, loss='categorical_crossentropy')
-
 # Training
 model = tflearn.DNN(net, tensorboard_verbose=0)
-model.fit(trainX, trainY, n_epoch=training_iters, validation_set=(testX, testY), show_metric=True,
+model.load("tflearn.lstm.model")
+while 1: #training_iters
+  model.fit(trainX, trainY, n_epoch=100, validation_set=(testX, testY), show_metric=True,
           batch_size=batch_size)
+  _y=model.predict(X)
+model.save("tflearn.lstm.model")
+print (_y)
+print (y)
+
