@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 #!/usr/bin/python
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
+
 import layer
 import speech_data
 from speech_data import Source,Target
-from layer import net
 
+#  LESS IS MORE! :
+# 0.001  Step 1000 Loss= 2.292103 Accuracy= 0.100 Time= 163s 			Test Accuracy:  0.1 too high vs
 # 0.0001  Step 1420 Loss= 1.794861 Accuracy= 0.600 Time= 231
-learning_rate = 0.001
+# 0.00001 Step 1700 Loss= 0.575172 Accuracy= 1.000 Time= 274s 			Test Accuracy:  0.8
+learning_rate = 0.00001
 training_iters = 300000 #steps
 batch_size = 64
 
@@ -16,6 +19,10 @@ batch_size = 64
 height=20 # mfcc features
 width=80 # (max) length of utterance
 classes=10 # digits
+
+batch = word_batch = speech_data.mfcc_batch_generator(batch_size, source=Source.DIGIT_WAVES, target=Target.digits)
+X, Y = next(batch)
+print("batch shape " + str(np.array(X).shape))
 
 shape=[-1, height, width, 1]
 # shape=[-1, width,height, 1]
@@ -53,9 +60,15 @@ def denseConv(net):
 	net.classifier() # auto classes from labels
 
 
+def recurrent(net):
+	# type: (layer.net) -> None
+	net.rnn()
+	net.classifier()
+
+
 def denseNet(net):
 	# type: (layer.net) -> None
-	print("Building dense-net")
+	print("Building fully connected pyramid")
 	net.reshape(shape)  # Reshape input picture
 	net.fullDenseNet()
 	net.classifier() # auto classes from labels
@@ -64,15 +77,11 @@ def denseNet(net):
 # batch=speech_data.spectro_batch_generator(1000,target=speech_data.Target.digits)
 # classes=10
 
-batch=word_batch=speech_data.mfcc_batch_generator(10, source=Source.DIGIT_WAVES, target=Target.digits)
-X,Y=next(batch)
-
-print("batch shape "+str(np.array(X).shape))
-
 # CHOSE MODEL ARCHITECTURE HERE:
-net=layer.net(simple_dense, data=batch,input_shape=[height,width],output_width=classes, learning_rate=learning_rate)
+# net=layer.net(simple_dense, data=batch,input_shape=[height,width],output_width=classes, learning_rate=learning_rate)
 # net=layer.net(model=alex,input_width= width*height,output_width=classes, learning_rate=learning_rate)
 # net=layer.net(model=denseConv,input_width= width*height,output_width=classes, learning_rate=learning_rate)
+net = layer.net(recurrent, data=batch, input_shape=[height, width], output_width=classes, learning_rate=learning_rate)
 
 # net.train(data=batch,batch_size=10,steps=500,dropout=0.6,display_step=1,test_step=1) # debug
 net.train(data=batch,batch_size=10,steps=training_iters,dropout=0.6,display_step=10,test_step=100) # test

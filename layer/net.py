@@ -284,6 +284,21 @@ class net():
 			print("output shape ",conv1.get_shape())
 			self.add(conv1)
 
+	def rnn(self):
+		# data = tf.placeholder(tf.float32, [None, width, height])  # Number of examples, number of input, dimension of each input
+		# target = tf.placeholder(tf.float32, [None, classes])
+		# num_hidden = 24
+		num_hidden = 42
+		cell = tf.nn.rnn_cell.LSTMCell(num_hidden)
+		val, _ = tf.nn.dynamic_rnn(cell, self.last_layer, dtype=tf.float32)
+		val = tf.nn.dropout(val,0.8)
+		val = tf.transpose(val, [1, 0, 2])
+		self.last = tf.gather(val, int(val.get_shape()[0]) - 1)
+		# weight = tf.Variable(tf.truncated_normal([num_hidden, int(target.get_shape()[1])]))
+		# bias = tf.Variable(tf.constant(0.1, shape=[target.get_shape()[1]]))
+		# mistakes = tf.not_equal(tf.argmax(target, 1), tf.argmax(prediction, 1))
+		# error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
+
 	def classifier(self,classes=0):  # Define loss and optimizer
 		if not classes: classes=self.num_classes
 		with tf.name_scope('prediction'):# prediction
