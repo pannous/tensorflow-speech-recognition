@@ -7,8 +7,8 @@ import speech_data
 from speech_data import Source,Target
 from layer import net
 
-
-learning_rate = 0.0001
+# 0.0001  Step 1420 Loss= 1.794861 Accuracy= 0.600 Time= 231
+learning_rate = 0.001
 training_iters = 300000 #steps
 batch_size = 64
 
