@@ -1,14 +1,15 @@
 """Utilities for downloading and providing data from openslr.org, libriSpeech, Pannous, Gutenberg, WMT, tokenizing, vocabularies."""
 # TODO! see https://github.com/pannous/caffe-speech-recognition for some data sources
 
-import gzip
 import os
-import sys
 import re
-import skimage.io # scikit-image
+import sys
+import wave
+
 import numpy
 import numpy as np
-import wave
+import skimage.io  # scikit-image
+
 try:
   import librosa
 except:
@@ -175,7 +176,8 @@ def mfcc_batch_generator(batch_size=10, source=Source.DIGIT_WAVES, target=Target
       batch_features.append(np.array(mfcc))
       if len(batch_features) >= batch_size:
         # print(np.array(batch_features).shape)
-        yield np.array(batch_features), labels
+        # yield np.array(batch_features), labels
+        yield batch_features, labels  # basic_rnn_seq2seq inputs must be a sequence
         batch_features = []  # Reset for next batch
         labels = []
 
