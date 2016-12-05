@@ -9,6 +9,10 @@ import skimage.io # scikit-image
 import numpy
 import numpy as np
 import wave
+try:
+  import librosa
+except:
+  print("pip install librosa ; if you want mfcc_batch_generator")
 # import extensions as xx
 from random import shuffle
 from six.moves import urllib
@@ -26,11 +30,11 @@ test_fraction=0.1 # 10% of data for test / verification
 
 # http://pannous.net/files/spoken_numbers_pcm.tar
 class Source:  # labels
-  NUMBER_WAVES = 'spoken_numbers_wav.tar'
   DIGIT_WAVES = 'spoken_numbers_pcm.tar'
   DIGIT_SPECTROS = 'spoken_numbers_spectros_64x64.tar'  # 64x64  baby data set, works astonishingly well
+  NUMBER_WAVES = 'spoken_numbers_wav.tar'
   NUMBER_IMAGES = 'spoken_numbers.tar'  # width=256 height=256
-  SPOKEN_WORDS = 'https://dl.dropboxusercontent.com/u/23615316/spoken_words.tar'  # width=512  height=512# todo: sliding window!
+  WORD_SPECTROS = 'https://dl.dropboxusercontent.com/u/23615316/spoken_words.tar'  # width,height=512# todo: sliding window!
   TEST_INDEX = 'test_index.txt'
   TRAIN_INDEX = 'train_index.txt'
 
@@ -44,6 +48,7 @@ class Target(Enum):  # labels
   sentence=6
   sentiment=7
   first_letter=8
+
 
 
 def progresshook(blocknum, blocksize, totalsize):
@@ -147,6 +152,33 @@ def spectro_batch_generator(batch_size=10,width=64,source_data=Source.DIGIT_SPEC
         batch = []  # Reset for next batch
         labels = []
 
+def mfcc_batch_generator(batch_size=10, source=Source.DIGIT_WAVES, target=Target.digits):
+  maybe_download(source, DATA_DIR)
+  if target == Target.speaker: speakers = get_speakers()
+  batch_features = []
+  labels = []
+  files = os.listdir(path)
+  while True:
+    print("loaded batch of %d files" % len(files))
+    shuffle(files)
+    for wav in files:
+      if not wav.endswith(".wav"): continue
+      wave, sr = librosa.load(path+wav, mono=True)
+      if target==Target.speaker: label=one_hot_from_item(speaker(wav), speakers)
+      elif target==Target.digits:  label=dense_to_one_hot(int(wav[0]),10)
+      elif target==Target.first_letter:  label=dense_to_one_hot((ord(wav[0]) - 48) % 32,32)
+      else: raise Exception("todo : labels for Target!")
+      labels.append(label)
+      mfcc = librosa.feature.mfcc(wave, sr)
+      # print(np.array(mfcc).shape)
+      mfcc=np.pad(mfcc,((0,0),(0,80-len(mfcc[0]))), mode='constant', constant_values=0)
+      batch_features.append(np.array(mfcc))
+      if len(batch_features) >= batch_size:
+        # print(np.array(batch_features).shape)
+        yield np.array(batch_features), labels
+        batch_features = []  # Reset for next batch
+        labels = []
+
 
 # If you set dynamic_pad=True when calling tf.train.batch the returned batch will be automatically padded with 0s. Handy! A lower-level option is to use tf.PaddingFIFOQueue.
 # only apply to a subset of all images at one time
@@ -159,15 +191,17 @@ def wave_batch_generator(batch_size=10,source=Source.DIGIT_WAVES,target=Target.d
   files = os.listdir(path)
   while True:
     shuffle(files)
+    print("loaded batch of %d files" % len(files))
     for wav in files:
       if not wav.endswith(".wav"):continue
       if target==Target.digits: labels.append(dense_to_one_hot(int(wav[0])))
-      if target==Target.speaker: labels.append(one_hot_from_item(speaker(wav), speakers))
+      elif target==Target.speaker: labels.append(one_hot_from_item(speaker(wav), speakers))
+      elif target==Target.first_letter:  label=dense_to_one_hot((ord(wav[0]) - 48) % 32,32)
+      else: raise Exception("todo : Target.word label!")
       chunk = load_wav_file(path+wav)
       batch_waves.append(chunk)
       # batch_waves.append(chunks[input_width])
       if len(batch_waves) >= batch_size:
-        print("loaded batch of %d files"%len(files))
         yield batch_waves, labels
         batch_waves = []  # Reset for next batch
         labels = []
