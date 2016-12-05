@@ -1,10 +1,13 @@
 from __future__ import print_function
-import tensorflow as tf
-import os
+
 import time
+
 import numpy as np
-from tensorboard_util import *
+import tensorflow as tf
 from tensorflow.contrib.tensorboard.plugins import projector # for 3d PCA/ t-SNE
+
+from tensorboard_util import *
+
 start = int(time.time())
 
 # clear_tensorboard()
@@ -15,7 +18,7 @@ run_tensorboard(restart=False)
 gpu = False
 debug = False #True # summary.histogram  : 'module' object has no attribute 'histogram' WTF
 debug = True # histogram_summary ...
-visualize = False # NOT YET: 'ProjectorConfig' object has no attribute 'embeddings'
+visualize_cluster = False # NOT YET: 'ProjectorConfig' object has no attribute 'embeddings'
 
 slim = tf.contrib.slim
 weight_divider=10.
@@ -33,7 +36,6 @@ def nop():return 0
 def closest_unitary(A):
   """ Calculate the unitary matrix U that is closest with respect to the operator norm distance to the general matrix A. """
   import scipy
-  from scipy import linalg
   V, __, Wh = scipy.linalg.svd(A)
   return np.matrix(V.dot(Wh))
 
@@ -61,7 +63,7 @@ class net():
 			self.layers=[]
 			self.learning_rate=learning_rate
 			if not name: name=model.__name__
-			self.name=name
+			self.name=str(name)
 			if name and os.path.exists(name+".model"):
 				return self.load_model(name+".model")
 			self.generate_model(model)
@@ -367,15 +369,16 @@ class net():
 			feed_dict = {x: batch_xs, y: batch_ys, keep_prob: dropout, self.train_phase: True}
 			loss,_= session.run([self.cost,self.optimizer], feed_dict=feed_dict)
 			if step % display_step == 0:
+				seconds = int(time.time())-start
 				# Calculate batch accuracy, loss
 				feed = {x: batch_xs, y: batch_ys, keep_prob: 1., self.train_phase: False}
 				acc , summary = session.run([self.accuracy,self.summaries], feed_dict=feed)
 				# self.summary_writer.add_summary(summary, step) # only test summaries for smoother curve
-				print("\rStep {:d} Loss= {:.6f} Accuracy= {:.3f}".format(step,loss,acc),end=' ')
+				print("\rStep {:d} Loss= {:.6f} Accuracy= {:.3f} Time= {:d}s".format(step,loss,acc,seconds),end=' ')
 				if str(loss)=="nan": return print("\nLoss gradiant explosion, exiting!!!") #restore!
 			if step % test_step == 0: self.test(step)
 			if step % save_step == 0 and step>0:
-				print("SAVING snapshot "+snapshot)
+				print("SAVING snapshot %s"%snapshot)
 				saver.save(session, checkpoint_dir+snapshot + ".ckpt", self.global_step)
 
 			step += 1
@@ -385,14 +388,14 @@ class net():
 	def test(self,step,number=400):#256 self.batch_size
 		session=sess=self.session
 		config = projector.ProjectorConfig()
-		if visualize:
+		if visualize_cluster:
 			embedding = config.embeddings.add()  # You can add multiple embeddings. Here just one.
 			embedding.tensor_name = self.last_layer.name # last_dense
 			# embedding.tensor_path
 			# embedding.tensor_shape
 			embedding.sprite.image_path = PATH_TO_SPRITE_IMAGE
 			# help(embedding.sprite)
-			embedding.sprite.single_image_dim.extend([28, 28]) # if mnist   thumbnail
+			embedding.sprite.single_image_dim.extend([width, hight]) # if mnist   thumbnail
 			# embedding.single_image_dim.extend([28, 28]) # if mnist   thumbnail
 			# Link this tensor to its metadata file (e.g. labels).
 			embedding.metadata_path = os.path.join(LOG_DIR, 'metadata.tsv')
@@ -412,6 +415,6 @@ class net():
 		self.summary_writer.add_run_metadata(run_metadata, 'step #%03d' % step)
 		self.summary_writer.add_summary(summary,global_step=step)
 
-	def inputs(self,data):
-		self.inputs, self.labels = load_data()#...)
+	# def inputs(self,data):
+	# 	self.inputs, self.labels = load_data()#...)
 
