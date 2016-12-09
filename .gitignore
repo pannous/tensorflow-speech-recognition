@@ -1,0 +1,9 @@
+data
+spoken_numbers
+node_modules/
+__pycache__
+OLD/
+logs/
+checkpoints
+*.pyc
+
