@@ -24,7 +24,8 @@ classes=10 # digits
 
 keep_prob=dropout=0.7
 
-batch = speech_data.mfcc_batch_generator(batch_size,target=Target.digits) #
+batch = speech_data.mfcc_batch_generator(batch_size, target=Target.word)  #
+# batch = speech_data.mfcc_batch_generator(batch_size, target=Target.hotword)  #
 X,Y=next(batch)
 # print(Y)
 print(np.array(Y).shape)
