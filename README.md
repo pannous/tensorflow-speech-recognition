@@ -40,9 +40,8 @@ Update: [Sphinx starts using tensorflow LSTMs](http://cmusphinx.sourceforge.net/
 
 ###Extensions 
 **Extensions** to current tensorflow which are probably needed:
+* [WarpCTC on the GPU](https://github.com/baidu-research/warp-ctc/tree/master/tensorflow_binding)
 * Incremental collaborative snapshots ('P2P learning') !
-* Sliding window GPU implementation
-* Continuous densenet->seq2seq adaptation
 * Modular graphs/models + persistance
 
 Even though this project is far from finished we hope it gives you some starting points.
