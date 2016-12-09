@@ -5,7 +5,7 @@ connectionist temporal classification to predict character sequences from nFeatu
 arrays of Mel-Frequency Cepstral Coefficients.  This is test code to run on the
 8-item data set in the "sample_data" directory, for those without access to TIMIT.
 
-Author: Jon Rein
+Original Author: Jon Rein
 '''
 
 from __future__ import absolute_import
@@ -17,6 +17,8 @@ from tensorflow.python.ops import ctc_ops as ctc
 from tensorflow.python.ops import rnn_cell
 from tensorflow.python.ops.rnn import bidirectional_rnn
 import numpy as np
+import re
+
 from bdlstm_utils import load_batched_data
 
 INPUT_PATH = '/data/ctc/sample_data/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
@@ -87,10 +89,25 @@ with graph.as_default():
 	reduced_sum = tf.reduce_sum(tf.edit_distance(predictions, targetY, normalize=False))
 	errorRate = reduced_sum / tf.to_float(tf.size(targetY.values))
 
+saver = tf.train.Saver()  # defaults to saving all variables
+ckpt = tf.train.get_checkpoint_state('./checkpoints')
 ####Run session
 with tf.Session(graph=graph) as session:
-	print('Initializing')
-	tf.initialize_all_variables().run()
+	merged = tf.merge_all_summaries()
+	writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
+
+	start = 0
+	if ckpt and ckpt.model_checkpoint_path:
+		p = re.compile('\./checkpoints/model\.ckpt-([0-9]+)')
+		m = p.match(ckpt.model_checkpoint_path)
+		start = int(m.group(1))
+	if start > 0:
+		# Restore variables from disk.
+		saver.restore(session, "./checkpoints/model.ckpt-%d" % start)
+		print("Model %d restored." % start)
+	else:
+		print('Initializing')
+		session.run(tf.initialize_all_variables())
 	for epoch in range(nEpochs):
 		print('Epoch', epoch + 1, '...')
 		batchErrors = np.zeros(len(batchedData))
@@ -109,3 +126,6 @@ with tf.Session(graph=graph) as session:
 			batchErrors[batch] = er * len(batchSeqLengths)
 		epochErrorRate = batchErrors.sum() / totalN
 		print('Epoch', epoch + 1, 'error rate:', epochErrorRate)
+		saver.save(session, 'checkpoints/model.ckpt', global_step=epoch + 1)
+	print('Learning finished')
+

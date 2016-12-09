@@ -57,6 +57,32 @@ class Target(Enum):  # labels
 	# test_word=9 # use 5 even for speaker etc
 
 
+num_characters = 32
+# num_characters=60 #  only one case, Including numbers
+# num_characters=128 #
+# num_characters=256 #  including special characters
+# offset=0  # 1:1 mapping ++
+# offset=32 # starting with ' ' space
+# offset=48 # starting with  numbers
+offset = 64  # starting with characters
+max_word_length = 20
+terminal_symbol = 0
+
+def pad(vec, pad_to=max_word_length, one_hot=False):
+	for i in range(0, pad_to - len(vec)):
+		if one_hot:
+			vec.append([terminal_symbol] * num_characters)
+		else:
+			vec.append(terminal_symbol)
+	return vec
+
+
+def string_to_int_word(word, pad_to):
+	z = map(lambda x: (ord(x) - offset) % num_characters, word)
+	z = list(z)
+	z = pad(z)
+	return z
+
 
 def progresshook(blocknum, blocksize, totalsize):
 		readsofar = blocknum * blocksize
@@ -173,6 +199,7 @@ def mfcc_batch_generator(batch_size=10, source=Source.DIGIT_WAVES, target=Target
 		for wav in files:
 			if not wav.endswith(".wav"): continue
 			wave, sr = librosa.load(path+wav, mono=True)
+			mfcc = librosa.feature.mfcc(wave, sr)
 			if target==Target.speaker: label=one_hot_from_item(speaker(wav), speakers)
 			elif target==Target.digits:  label=dense_to_one_hot(int(wav[0]),10)
 			elif target==Target.first_letter:  label=dense_to_one_hot((ord(wav[0]) - 48) % 32,32)
@@ -180,7 +207,6 @@ def mfcc_batch_generator(batch_size=10, source=Source.DIGIT_WAVES, target=Target
 			elif target == Target.word:  label = string_to_int_word(wav, pad_to=20)  # max_output_length
 			else: raise Exception("todo : labels for Target!")
 			labels.append(label)
-			mfcc = librosa.feature.mfcc(wave, sr)
 			# print(np.array(mfcc).shape)
 			mfcc=np.pad(mfcc,((0,0),(0,80-len(mfcc[0]))), mode='constant', constant_values=0)
 			batch_features.append(np.array(mfcc))
@@ -321,27 +347,6 @@ def one_hot_from_item(item, items):
 	i=items.index(item)
 	x[i]=1
 	return x
-
-num_characters=32
-# num_characters=60 #  only one case, Including numbers
-# num_characters=128 #
-# num_characters=256 #  including special characters
-# offset=0  # 1:1 mapping ++
-# offset=32 # starting with ' ' space
-# offset=48 # starting with  numbers
-offset=64 # starting with characters
-max_word_length=20
-
-def pad(vec,pad_to=max_word_length):
-	for i in range(0, pad_to - len(vec)):
-		vec.append([-1] * num_characters)  # Terminal 'symbol'
-	return vec
-
-def string_to_int_word(word, pad_to):
-	z = map(lambda x: (ord(x) - offset) % num_characters, word)
-	z= list(z)
-	z=pad(z)
-	return z
 
 
 def one_hot_word(word,pad_to=max_word_length):

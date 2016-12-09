@@ -48,6 +48,6 @@ Update: [Sphinx starts using tensorflow LSTMs](http://cmusphinx.sourceforge.net/
 Even though this project is far from finished we hope it gives you some starting points.
 
 Looking for a tensorflow consultant / deep learning contractor? Reach out to info@pannous.com
-
+<!-- 
 ### Warning / Attention
-Google keeps [deliberately breaking the tensorflow API](https://github.com/tensorflow/tensorflow/issues/4283) so you always need the latest tensorflow release if you want current examples to run (and can't run old tensorflow stuff simultaneously.)
+Google keeps [deliberately breaking the tensorflow API](https://github.com/tensorflow/tensorflow/issues/4283) so you always need the latest tensorflow release if you want current examples to run (and can't run old tensorflow stuff simultaneously.) -->
