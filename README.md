@@ -6,7 +6,7 @@ Replaces [caffe-speech-recognition](https://github.com/pannous/caffe-speech-reco
 ## Ultimate goal
 Create a decent standalone speech recognition for Linux etc.
 Some people say we have the models but not enough training data.
-We disagree: There is plenty of training data (100GB [here](http://www.openslr.org/12) and 21GB [here on openslr.org](http://www.openslr.org/7/) , on Gutenberg, synthetic Text to Speech snippets, Movies with transcripts, YouTube with captions etc etc) we just need a simple yet powerful model. It's only a question of time...
+We disagree: There is plenty of training data (100GB [here](http://www.openslr.org/12) and 21GB [here on openslr.org](http://www.openslr.org/7/) , synthetic Text to Speech snippets, Movies with transcripts, Gutenberg, YouTube with captions etc etc) we just need a simple yet powerful model. It's only a question of time...
 
 
 ![Sample spectrogram, That's what she said, too laid?](https://raw.githubusercontent.com/pannous/caffe-speech-recognition/master/0_Karen_160.png)
