@@ -2,10 +2,11 @@
 from __future__ import print_function
 import numpy as np
 import tensorflow as tf
-import layer
 import speech_data
 from speech_data import Source,Target
-from layer import net
+from tensorflow.python.ops import ctc_ops as ctc
+# import layer
+# from layer import net
 import time
 start=int(time.time())
 display_step = 1
@@ -66,6 +67,14 @@ y_ = tf.matmul(y_, weights, name='dense' ) + bias
 # optimize
 # if use_word: y=target=tf.placeholder(tf.float32, shape=(batch_size,(None,32))) # -> seq2seq!
 y=target=tf.placeholder(tf.float32, shape=(batch_size,classes))
+
+
+####Optimizing
+logits=y_
+logits3d = tf.pack(logits)
+seqLengths=[20]*batch_size
+cost = tf.reduce_mean(ctc.ctc_loss(logits3d, target, seqLengths))
+
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_,y),name="cost")  # prediction, target
 tf.scalar_summary('cost', cost)
 optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
