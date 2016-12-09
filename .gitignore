@@ -7,3 +7,6 @@ logs/
 checkpoints
 *.pyc
 
+sugartensor
+extensions.py
+extension_functions.py
