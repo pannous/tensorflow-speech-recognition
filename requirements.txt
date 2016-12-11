@@ -1,11 +1,12 @@
-tensorflow
 #required
+tensorflow
+tflearn
 numpy
-scikit-image
 
-#optional
+#optional:
+scikit-image
 pyaudio
-# cv,cv2 #  deprecated, we use matplotlib.pyplot now
-matplotlib 
 wave
-tflearn 
+python_speech_features
+matplotlib
+# cv,cv2 #  deprecated, we use matplotlib.pyplot now
