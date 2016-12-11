@@ -3,6 +3,7 @@ import os
 # list voices: `say -v ?`
 import librosa #mfcc 1.st lib
 # from scikits.talkbox.features import mfcc # 2'nd lib
+import python_speech_features
 import numpy as np
 import subprocess
 
@@ -124,10 +125,20 @@ def generate_mfcc(voice, word, rate, path):
 	filename = path+"/ogg/{0}_{1}_{2}.ogg".format(word, voice, rate)
 	cmd = "say '{0}' -v{1} -r{2}  -o '{3}'".format(word, voice, rate, filename)
 	os.system(cmd)  # ogg aiff m4a or caff
-	wave, sample_rate = librosa.load(filename, mono=True)
-	mel_features = librosa.feature.mfcc(wave, sample_rate)
+	signal, sample_rate = librosa.load(filename, mono=True)
+	mel_features = librosa.feature.mfcc(signal, sample_rate)
 	# sample_rate, wave = scipy.io.wavfile.read(filename) # 2nd lib
 	# mel_features, mspec, spec = mfcc(wave, fs=sample_rate, nceps=20)
+
+
+	mel_features=python_speech_features.mfcc(signal, samplerate=sample_rate)
+	print len(mel_features)
+
+		# , winlen=0.025, winstep=0.01, numcep=13,
+	   #       nfilt=26, nfft=512, lowfreq=0, highfreq=None, preemph=0.97,
+	   #       ceplifter=22, appendEnergy=True)
+	# lib3
+
 	np.save(path + "/mfcc/%s.npy" % word, mel_features)
 
 

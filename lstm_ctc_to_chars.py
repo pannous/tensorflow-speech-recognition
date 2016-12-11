@@ -21,11 +21,11 @@ import re
 
 from bdlstm_utils import load_batched_data
 
-# INPUT_PATH = '/data/ctc/sample_data/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
-# TARGET_PATH = '/data/ctc/sample_data/char_y/'  # directory of nCharacters 1-D array .npy files
-
-INPUT_PATH = 'data/number/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
-TARGET_PATH = 'data/number/chars/'  # directory of nCharacters 1-D array .npy files
+INPUT_PATH = '/data/ctc/sample_data/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
+TARGET_PATH = '/data/ctc/sample_data/char_y/'  # directory of nCharacters 1-D array .npy files
+#
+# INPUT_PATH = 'data/number/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
+# TARGET_PATH = 'data/number/chars/'  # directory of nCharacters 1-D array .npy files
 
 ####Learning Parameters
 learningRate = 0.001
@@ -34,7 +34,8 @@ nEpochs = 300
 batchSize = 4
 
 ####Network Parameters
-nFeatures = 26  # 12 MFCC coefficients + energy, and derivatives
+# nFeatures = 26  # 12 MFCC coefficients + energy, and derivatives
+nFeatures = 20  # 20 MFCC coefficients + ^^ WHERE DID YOU GET THOSE?
 nHidden = 128
 nClasses = 28  # 27 characters, plus the "blank" for CTC
 
@@ -92,18 +93,19 @@ with graph.as_default():
 	reduced_sum = tf.reduce_sum(tf.edit_distance(predictions, targetY, normalize=False))
 	errorRate = reduced_sum / tf.to_float(tf.size(targetY.values))
 
-saver = tf.train.Saver()  # defaults to saving all variables
-ckpt = tf.train.get_checkpoint_state('./checkpoints')
 ####Run session
 with tf.Session(graph=graph) as session:
 	merged = tf.merge_all_summaries()
 	writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
+	saver = tf.train.Saver()  # defaults to saving all variables
+	ckpt = tf.train.get_checkpoint_state('./checkpoints')
 
 	start = 0
 	if ckpt and ckpt.model_checkpoint_path:
 		p = re.compile('\./checkpoints/model\.ckpt-([0-9]+)')
 		m = p.match(ckpt.model_checkpoint_path)
-		start = int(m.group(1))
+		try:start = int(m.group(1))
+		except:pass
 	if start > 0:
 		# Restore variables from disk.
 		saver.restore(session, "./checkpoints/model.ckpt-%d" % start)
