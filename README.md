@@ -29,21 +29,21 @@ Later:
 
 ## Partners + collaborators wanted
 We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party, no matter your background.
-╮⚆ᴥ⚆╭
+<!-- ╮⚆ᴥ⚆╭ -->
 
 Update: [Sphinx starts using tensorflow LSTMs](http://cmusphinx.sourceforge.net/). Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build models that are state of the art. Unfortunately they didn't open source the software.
-ᖗ*﹏*ᖘ
+<!-- ᖗ*﹏*ᖘ -->
 
 ###Fun tasks for newcomers
 * Data Augmentation :  create on-the-fly modulation of the data: increase the speech frequency, add background noise, alter the pitch etc,...
-ᕮ◔‿◔ᕭ
+<!-- ᕮ◔‿◔ᕭ -->
 
 ###Extensions 
 **Extensions** to current tensorflow which are probably needed:
 * [WarpCTC on the GPU](https://github.com/baidu-research/warp-ctc/tree/master/tensorflow_binding)
 * Incremental collaborative snapshots ('P2P learning') !
 * Modular graphs/models + persistance
-⤜(⨱ᴥ⨱)⤏
+<!-- ⤜(⨱ᴥ⨱)⤏ -->
 
 Even though this project is far from finished we hope it gives you some starting points.
 
