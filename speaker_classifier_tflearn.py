@@ -1,6 +1,5 @@
 #!/usr/bin/env PYTHONIOENCODING="utf-8" python
 import tflearn
-import pyaudio
 import speech_data as data
 
 # Simple speaker recognition demo, with 99% accuracy in under a minute ( on digits sample )
