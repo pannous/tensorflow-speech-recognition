@@ -23,7 +23,18 @@ from bdlstm_utils import load_batched_data
 
 INPUT_PATH = '/data/ctc/sample_data/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
 TARGET_PATH = '/data/ctc/sample_data/char_y/'  # directory of nCharacters 1-D array .npy files
-#
+# HUH?? >>> np.load("/data/ctc/sample_data/char_y/0.npy")
+# array([19, 15, 26, 2, 0, 18, 22, 18, 12, 2, 0, 18, 4, 16, 1, 0, 8,
+#        26, 17, 26, 14, 12, 2, 0, 8, 22, 13, 0, 15, 4, 14, 12, 19, 15,
+#        12, 0, 15, 5, 22, 15, 19, 25, 4, 0, 15, 26, 14, 12, 26, 1, 0,
+#        4, 14, 26, 0, 4, 14, 26, 0, 26, 22, 25, 5, 12, 0, 3, 4, 22,
+#        14, 12, 0, 12, 21, 4, 0, 12, 21, 4], dtype=uint8)
+# >> > map(lambda x: chr(x + 64), _)
+# ['S', 'O', 'Z', 'B', '@', 'R', 'V', 'R', 'L', 'B', '@', 'R', 'D', 'P', 'A', '@', 'H', 'Z', 'Q', 'Z', 'N', 'L', 'B', '@',
+#  'H', 'V', 'M', '@', 'O', 'D', 'N', 'L', 'S', 'O', 'L', '@', 'O', 'E', 'V', 'O', 'S', 'Y', 'D', '@', 'O', 'Z', 'N', 'L',
+#  'Z', 'A', '@', 'D', 'N', 'Z', '@', 'D', 'N', 'Z', '@', 'Z', 'V', 'Y', 'E', 'L', '@', 'C', 'D', 'V', 'N', 'L', '@', 'L',
+#  'U', 'D', '@', 'L', 'U', 'D']
+
 # INPUT_PATH = 'data/number/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
 # TARGET_PATH = 'data/number/chars/'  # directory of nCharacters 1-D array .npy files
 
@@ -34,8 +45,8 @@ nEpochs = 300
 batchSize = 4
 
 ####Network Parameters
-# nFeatures = 26  # 12 MFCC coefficients + energy, and derivatives
-nFeatures = 20  # 20 MFCC coefficients + ^^ WHERE DID YOU GET THOSE?
+nFeatures = 26  # 12 MFCC coefficients + energy, and derivatives
+# nFeatures = 20  # 20 MFCC coefficients + ^^ WHERE DID YOU GET THOSE?
 nHidden = 128
 nClasses = 28  # 27 characters, plus the "blank" for CTC
 
@@ -96,7 +107,8 @@ with graph.as_default():
 ####Run session
 with tf.Session(graph=graph) as session:
 	merged = tf.merge_all_summaries()
-	writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
+	# writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
+	writer = tf.summary.FileWriter("/tmp/basic_new", session.graph)
 	saver = tf.train.Saver()  # defaults to saving all variables
 	ckpt = tf.train.get_checkpoint_state('./checkpoints')
 

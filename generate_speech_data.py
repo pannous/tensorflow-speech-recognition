@@ -1,13 +1,14 @@
 import os
 
-# list voices: `say -v ?`
 import librosa #mfcc 1.st lib
 # from scikits.talkbox.features import mfcc # 2'nd lib
+import os.path
 import python_speech_features
 import numpy as np
 import subprocess
 
 AUTOMATIC_ALL_VOICES=False
+# list voices: `say -v ?`
 # good_voices = [] #AUTOMATIC !!
 good_voices = """
 Agnes
@@ -89,7 +90,7 @@ def pronounced_to_phoneme_class(pronounced):
 	raise Exception("TODO")
 	phonemes = map(char_to_class, pronounced)
 	z = pad(z, pad_to)
-	return phonemes  # "_hEllO"->[11,42,24,0,0,0,0,0] padded
+	return phonemes  # "_hEllO"->[11,42,24,21,0,0,0,0] padded
 
 
 def string_to_int_word(word, pad_to=max_word_length):
@@ -126,36 +127,31 @@ def generate_mfcc(voice, word, rate, path):
 	cmd = "say '{0}' -v{1} -r{2}  -o '{3}'".format(word, voice, rate, filename)
 	os.system(cmd)  # ogg aiff m4a or caff
 	signal, sample_rate = librosa.load(filename, mono=True)
-	mel_features = librosa.feature.mfcc(signal, sample_rate)
+	# mel_features = librosa.feature.mfcc(signal, sample_rate)
 	# sample_rate, wave = scipy.io.wavfile.read(filename) # 2nd lib
 	# mel_features, mspec, spec = mfcc(wave, fs=sample_rate, nceps=20)
-
-
-	mel_features=python_speech_features.mfcc(signal, samplerate=sample_rate)
-	print len(mel_features)
-
-		# , winlen=0.025, winstep=0.01, numcep=13,
-	   #       nfilt=26, nfft=512, lowfreq=0, highfreq=None, preemph=0.97,
-	   #       ceplifter=22, appendEnergy=True)
-	# lib3
-
-	np.save(path + "/mfcc/%s.npy" % word, mel_features)
+	mel_features=python_speech_features.mfcc(signal, numcep=26, nfilt=26*2,samplerate=sample_rate) # 3rd lib
+	# print len(mel_features)
+	# print len(mel_features[0])
+	# print("---")
+	np.save(path + "/mfcc/%s_%s_%r.npy" % (word,voice,rate), mel_features)
 
 
 def generate_phonemes(word,  path):
 	chars= string_to_int_word( word )
 	np.save(path + "/chars/%s.npy"%word, chars)
 	pronounced=subprocess.check_output(["./word_to_phonemes.swift", word])
-	phonemes= pronounced_to_phoneme_class(pronounced)
-	np.save(path + "/phones/%s.npy"%word, phonemes)
+	# phonemes= pronounced_to_phoneme_class(pronounced)
+	# np.save(path + "/phones/%s.npy"%word, phonemes)
 
 
-def generate(words, path="numbers"):
+def generate(words, path):
 	# generate a bunch of files for each word (with many voices, nuances):
 	# spoken wav/ogg
 	# spectograph
 	# mfcc Mel-frequency cepstrum
 	# pronounced phonemes
+	if not os.path.exists(path): os.mkdir(path)
 	out=open(path + "/words.list", "wt")
 	for word in words:
 		print("generating %s"%word)
@@ -169,8 +165,11 @@ def generate(words, path="numbers"):
 				pass  # ignore after debug!
 
 
+# generates
+# number/chars/1.npy
+# number/mfcc/1_Kathy_120.npy for each voice
 def spoken_numbers():
-	path = "numbers"
+	path = "number"
 	generate(map(str,range(0,10)),path)
 
 
