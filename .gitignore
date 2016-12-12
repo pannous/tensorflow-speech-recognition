@@ -12,3 +12,4 @@ extensions.py
 extension_functions.py
 0_Kathy_160.wav
 lstm_mfcc_ctc_to_words.py
+extra/contributors.txt

@@ -107,8 +107,8 @@ with graph.as_default():
 ####Run session
 with tf.Session(graph=graph) as session:
 	merged = tf.merge_all_summaries()
-	# writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
-	writer = tf.summary.FileWriter("/tmp/basic_new", session.graph)
+	writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
+	# writer = tf.summary.FileWriter("/tmp/basic_new", session.graph)
 	saver = tf.train.Saver()  # defaults to saving all variables
 	ckpt = tf.train.get_checkpoint_state('./checkpoints')
 
