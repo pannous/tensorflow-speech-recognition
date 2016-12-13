@@ -68,17 +68,23 @@ y = target = tf.placeholder(tf.float32, shape=(batch_size, max_word_length, clas
 logits=[]
 costs=[]
 i=0
+accuracy=0
 # for output in outputs:
 for i in range(0, max_word_length):
 	output=outputs[-i-1]
-	weights = tf.Variable(tf.random_uniform([num_hidden, classes], minval=-1. / width, maxval=1. / width), name="weights_dense")
-	bias = tf.Variable(tf.random_uniform([classes], minval=-1. / width, maxval=1. / width), name="bias_dense")
-	y_ = outputY = tf.matmul(output, weights, name='dense' ) + bias
+	weights = tf.Variable(tf.random_uniform([num_hidden, classes], minval=-1. / width, maxval=1./width), name="weights_%d"%i)
+	bias = tf.Variable(tf.random_uniform([classes], minval=-1. / width, maxval=1. / width), name="bias_dense_%d"%i)
+	y_ = outputY = tf.matmul(output, weights, name="dense_%d" % i) + bias
 
 	cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_, y[:,i,:]), name="cost")  # prediction, target
 	costs.append(cost)
 	logits.append(y_)
-costs=tf.reduce_sum(costs)
+
+	correct_pred = tf.equal(tf.argmax(outputY, 1), tf.argmax(y[:,i], 1))
+	accuraci = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+	accuracy+= accuraci
+
+costs=tf.reduce_sum(costs)*10
 # y_ = outputY = tf.pack(logits)
 
 # targetIxs = tf.placeholder(tf.int64, shape=(batch_size, None),name="indices")
@@ -98,11 +104,10 @@ optimizer = tf.train.AdamOptimizer(learning_rate).minimize(costs)
 # prediction = y_
 
 # Evaluate model
-# correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
 # accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 # tf.scalar_summary('accuracy', accuracy)
 # predictions = tf.to_int32(ctc.ctc_beam_search_decoder(logits3d, seqLengths)[0][0])
-accuracy = tf.reduce_mean(tf.reduce_mean(logits))
+# accuracy = tf.reduce_mean(tf.reduce_mean(logits))
 # reduced_sum = tf.reduce_sum(tf.edit_distance(predictions, targetY, normalize=False))
 # errorRate = reduced_sum / tf.to_float(tf.size(targetY.values))
 
