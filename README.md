@@ -31,7 +31,7 @@ Later:
 We are in the process of tackling this project in seriousness. Drop an email to info@pannous.com if you want to join the party, no matter your background.
 <!-- ╮⚆ᴥ⚆╭ -->
 
-Update: [Sphinx starts using tensorflow LSTMs](http://cmusphinx.sourceforge.net/). Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build models that are state of the art. Unfortunately they didn't open source the software.
+Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build models that are state of the art. Unfortunately they didn't open source the software.
 <!-- ᖗ*﹏*ᖘ -->
 
 ###Fun tasks for newcomers

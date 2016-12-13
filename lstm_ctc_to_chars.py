@@ -35,8 +35,8 @@ TARGET_PATH = '/data/ctc/sample_data/char_y/'  # directory of nCharacters 1-D ar
 #  'Z', 'A', '@', 'D', 'N', 'Z', '@', 'D', 'N', 'Z', '@', 'Z', 'V', 'Y', 'E', 'L', '@', 'C', 'D', 'V', 'N', 'L', '@', 'L',
 #  'U', 'D', '@', 'L', 'U', 'D']
 
-# INPUT_PATH = 'data/number/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
-# TARGET_PATH = 'data/number/chars/'  # directory of nCharacters 1-D array .npy files
+INPUT_PATH = 'data/number/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
+TARGET_PATH = 'data/number/chars/'  # directory of nCharacters 1-D array .npy files
 
 ####Learning Parameters
 learningRate = 0.001
@@ -109,7 +109,8 @@ with tf.Session(graph=graph) as session:
 	merged = tf.merge_all_summaries()
 	writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
 	# writer = tf.summary.FileWriter("/tmp/basic_new", session.graph)
-	saver = tf.train.Saver()  # defaults to saving all variables
+	try:saver = tf.train.Saver()  # defaults to saving all variables
+	except: print("tf.train.Saver() broken in tensorflow 0.12")
 	ckpt = tf.train.get_checkpoint_state('./checkpoints')
 
 	start = 0
@@ -118,7 +119,7 @@ with tf.Session(graph=graph) as session:
 		m = p.match(ckpt.model_checkpoint_path)
 		try:start = int(m.group(1))
 		except:pass
-	if start > 0:
+	if saver and start > 0:
 		# Restore variables from disk.
 		saver.restore(session, "./checkpoints/model.ckpt-%d" % start)
 		print("Model %d restored." % start)
@@ -143,6 +144,6 @@ with tf.Session(graph=graph) as session:
 			batchErrors[batch] = er * len(batchSeqLengths)
 		epochErrorRate = batchErrors.sum() / totalN
 		print('Epoch', epoch + 1, 'error rate:', epochErrorRate)
-		saver.save(session, 'checkpoints/model.ckpt', global_step=epoch + 1)
+		if saver:saver.save(session, 'checkpoints/model.ckpt', global_step=epoch + 1)
 	print('Learning finished')
 

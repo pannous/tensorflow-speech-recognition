@@ -68,7 +68,7 @@ no_rate = ["Bad News", "Bells", "Good News", "Cellos", "Pipe\ Organ"]
 num_characters = 32
 terminal_symbol = 0
 offset = 64  # starting with UPPER case characters ord('A'):65->1
-max_word_length = 20
+max_word_length = 78# 20
 
 def pad(vec, pad_to=max_word_length,one_hot=False):
 	for i in range(0, pad_to - len(vec)):
@@ -78,8 +78,9 @@ def pad(vec, pad_to=max_word_length,one_hot=False):
 
 
 def char_to_class(c):
-	# type: (char) -> int
-	classe=(ord(c) - offset) % num_characters
+	# type: (char|int) -> int
+	if not isinstance(c,int): c=ord(c)
+	classe=(c - offset) % num_characters
 	if c==' ' or c=="_": classe= terminal_symbol  # needed by ctc
 	return classe # A->1 ... Z->26
 
@@ -96,14 +97,14 @@ def pronounced_to_phoneme_class(pronounced):
 def string_to_int_word(word, pad_to=max_word_length):
 	# type: (str) -> [int]
 	z = map(char_to_class, word)
-	# z = list(z)  # py3
+	z = list(z)  # py3
 	z = pad(z, pad_to)
 	# z = np.array(z)
 	return z # "abd"->[1,2,4,0,0,0,0,0] padded
 
 
 def check_voices():
-	voice_infos=subprocess.check_output(["say", "-v?"]).split("\n")[:-2]
+	voice_infos=str(subprocess.check_output(["say", "-v?"])).split("\n")[:-2]
 	voices=map(lambda x:x.split()[0],voice_infos)
 	for voice in good_voices:
 		if voice in voices:
@@ -134,13 +135,19 @@ def generate_mfcc(voice, word, rate, path):
 	# print len(mel_features)
 	# print len(mel_features[0])
 	# print("---")
-	np.save(path + "/mfcc/%s_%s_%r.npy" % (word,voice,rate), mel_features)
+	np.save(path + "/mfcc/%s_%s_%d.npy" % (word,voice,rate), mel_features)
+
+def generate_chars(voice, word, rate, path):
+	# chars = string_to_int_word(word) # todo : softlink!
+	# os.symlink("%d.npy","%s_%s_%d.npy" % (word, voice, rate))
+	# np.save(path + "/chars/%s_%s_%d.npy" % (word, voice, rate), chars)
 
 
 def generate_phonemes(word,  path):
-	chars= string_to_int_word( word )
+	pronounced=subprocess.check_output(["./word_to_phonemes.swift", word]).decode('UTF-8').strip()
+	word = pronounced #hack for numbers!
+	chars= string_to_int_word( word ,pad_to=max_word_length)
 	np.save(path + "/chars/%s.npy"%word, chars)
-	pronounced=subprocess.check_output(["./word_to_phonemes.swift", word])
 	# phonemes= pronounced_to_phoneme_class(pronounced)
 	# np.save(path + "/phones/%s.npy"%word, phonemes)
 
@@ -152,14 +159,19 @@ def generate(words, path):
 	# mfcc Mel-frequency cepstrum
 	# pronounced phonemes
 	if not os.path.exists(path): os.mkdir(path)
+	if not os.path.exists(path + "/chars/"): os.mkdir(path + "/chars/")
+	if not os.path.exists(path + "/mfcc/"): os.mkdir(path + "/mfcc/")
 	out=open(path + "/words.list", "wt")
 	for word in words:
+		if isinstance(word, bytes):
+			word=word.decode('UTF-8').strip()
 		print("generating %s"%word)
 		out.write("%s\n"%word)
 		generate_phonemes(word, path)
 		rate=120
 		for voice in good_voices:
 			try:
+				generate_chars(voice, word, rate, path)
 				generate_mfcc(voice, word, rate, path)
 			except:
 				pass  # ignore after debug!
@@ -170,7 +182,8 @@ def generate(words, path):
 # number/mfcc/1_Kathy_120.npy for each voice
 def spoken_numbers():
 	path = "number"
-	generate(map(str,range(0,10)),path)
+	nums = list(map(str, range(0, 10)))
+	generate(nums, path)
 
 
 def spoken_words():

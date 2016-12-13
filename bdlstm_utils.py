@@ -42,8 +42,8 @@ def data_lists_to_batches(inputList, targetList, batchSize):
                     targets = tuple required as input for SparseTensor
                     seqLengths = 1-d array with int number of timesteps for each sample in batch
                 maxSteps: maximum number of time steps across all samples'''
-    
-    assert len(inputList) == len(targetList)
+
+    assert len(inputList) == len(targetList), "%d!=%d"%(len(inputList),len(targetList))
     nFeatures = inputList[0].shape[0]
     maxSteps = 0
     for inp in inputList:
@@ -70,11 +70,12 @@ def data_lists_to_batches(inputList, targetList, batchSize):
         end += batchSize
     return (dataBatches, maxSteps)
 
-def load_batched_data(specPath, targetPath, batchSize):
+def load_batched_data(specPath, targetPath, batchSize, match=True):
     import os
     '''returns 4-element tuple: batched data (list), max # of time steps (int),
        total number of samples (int) and number of classes incl. noc (int)'''
     nClasses = 28 # 27 chars plus 1 noc
     a = [np.load(os.path.join(specPath, fn)) for fn in os.listdir(specPath)]
-    b = [np.load(os.path.join(targetPath, fn)) for fn in os.listdir(targetPath)]
+    if match:b = [np.load(os.path.join(targetPath, fn)) for fn in os.listdir(specPath)]
+    else: b = [np.load(os.path.join(targetPath, fn)) for fn in os.listdir(targetPath)]
     return data_lists_to_batches(a, b, batchSize) + (len(os.listdir(specPath)),nClasses)
