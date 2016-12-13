@@ -76,12 +76,39 @@ def pad(vec, pad_to=max_word_length, one_hot=False):
 			vec.append(terminal_symbol)
 	return vec
 
+def char_to_class(c):
+	return (ord(c) - offset) % num_characters
 
 def string_to_int_word(word, pad_to):
-	z = map(lambda x: (ord(x) - offset) % num_characters, word)
+	z = map(char_to_class, word)
 	z = list(z)
 	z = pad(z)
 	return z
+
+class SparseLabels:
+	def __init__(labels):
+		labels.indices = {}
+		labels.values = []
+
+	def shape(self):
+		return (len(self.indices),len(self.values))
+
+# labels: An `int32` `SparseTensor`.
+# labels.indices[i, :] == [b, t] means `labels.values[i]` stores the id for (batch b, time t).
+# labels.values[i]` must take on values in `[0, num_labels)`.
+def sparse_labels(vec):
+	labels = SparseLabels()
+	b=0
+	for lab in vec:
+		t=0
+		for c in lab:
+			labels.indices[b, t] = len(labels.values)
+			labels.values.append(char_to_class(c))
+			# labels.values[i] = char_to_class(c)
+			t += 1
+		b += 1
+	return labels
+
 
 
 def progresshook(blocknum, blocksize, totalsize):
@@ -185,8 +212,6 @@ def spectro_batch_generator(batch_size=10,width=64,source_data=Source.DIGIT_SPEC
 				batch = []  # Reset for next batch
 				labels = []
 
-
-
 def mfcc_batch_generator(batch_size=10, source=Source.DIGIT_WAVES, target=Target.digits):
 	maybe_download(source, DATA_DIR)
 	if target == Target.speaker: speakers = get_speakers()
@@ -196,21 +221,24 @@ def mfcc_batch_generator(batch_size=10, source=Source.DIGIT_WAVES, target=Target
 	while True:
 		print("loaded batch of %d files" % len(files))
 		shuffle(files)
-		for wav in files:
-			if not wav.endswith(".wav"): continue
-			wave, sr = librosa.load(path+wav, mono=True)
+		for file in files:
+			if not file.endswith(".wav"): continue
+			wave, sr = librosa.load(path+file, mono=True)
 			mfcc = librosa.feature.mfcc(wave, sr)
-			if target==Target.speaker: label=one_hot_from_item(speaker(wav), speakers)
-			elif target==Target.digits:  label=dense_to_one_hot(int(wav[0]),10)
-			elif target==Target.first_letter:  label=dense_to_one_hot((ord(wav[0]) - 48) % 32,32)
-			elif target == Target.hotword: label = one_hot_word(wav, pad_to=20)  # max_output_length
-			elif target == Target.word:  label = string_to_int_word(wav, pad_to=20)  # max_output_length
+			if target==Target.speaker: label=one_hot_from_item(speaker(file), speakers)
+			elif target==Target.digits:  label=dense_to_one_hot(int(file[0]),10)
+			elif target==Target.first_letter:  label=dense_to_one_hot((ord(file[0]) - 48) % 32,32)
+			elif target == Target.hotword: label = one_hot_word(file, pad_to=20)  # max_output_length
+			elif target == Target.word: label=string_to_int_word(file, pad_to=20)
+				# label = file  # sparse_labels(file, pad_to=20)  # max_output_length
 			else: raise Exception("todo : labels for Target!")
 			labels.append(label)
 			# print(np.array(mfcc).shape)
 			mfcc=np.pad(mfcc,((0,0),(0,80-len(mfcc[0]))), mode='constant', constant_values=0)
 			batch_features.append(np.array(mfcc))
 			if len(batch_features) >= batch_size:
+				# if target == Target.word:  labels = sparse_labels(labels)
+				# labels=np.array(labels)
 				# print(np.array(batch_features).shape)
 				# yield np.array(batch_features), labels
 				# print(np.array(labels).shape) # why (64,) instead of (64, 15, 32)? OK IFF dim_1==const (20)

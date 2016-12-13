@@ -138,7 +138,7 @@ def generate_mfcc(voice, word, rate, path):
 	np.save(path + "/mfcc/%s_%s_%d.npy" % (word,voice,rate), mel_features)
 
 def generate_chars(voice, word, rate, path):
-	# chars = string_to_int_word(word) # todo : softlink!
+	chars = string_to_int_word(word) # todo : softlink!
 	# os.symlink("%d.npy","%s_%s_%d.npy" % (word, voice, rate))
 	# np.save(path + "/chars/%s_%s_%d.npy" % (word, voice, rate), chars)
 
