@@ -27,8 +27,8 @@ max_word_length = 20  # max length of output (characters per word)
 
 keep_prob=dropout=0.7
 
-batch = speech_data.mfcc_batch_generator(batch_size, target=Target.word)  # labels_values is not a vector
-# batch = speech_data.mfcc_batch_generator(batch_size, target=Target.hotword)  # labels_indices is not a matrix
+# batch = speech_data.mfcc_batch_generator(batch_size, target=Target.word)  # labels_values is not a vector
+batch = speech_data.mfcc_batch_generator(batch_size, target=Target.hotword)  # labels_indices is not a matrix
 X,Y=next(batch)
 # print(Y)
 print(np.array(Y).shape)
@@ -61,17 +61,25 @@ else:
 	# only last output as target for now
 	# y_=outputs[-1]
 
+# optimize
+y = target = tf.placeholder(tf.float32, shape=(batch_size, max_word_length, classes))  # -> seq2seq!
+
 # dense
 logits=[]
-for output in outputs:
+costs=[]
+i=0
+# for output in outputs:
+for i in range(0, max_word_length):
+	output=outputs[-i-1]
 	weights = tf.Variable(tf.random_uniform([num_hidden, classes], minval=-1. / width, maxval=1. / width), name="weights_dense")
 	bias = tf.Variable(tf.random_uniform([classes], minval=-1. / width, maxval=1. / width), name="bias_dense")
-	y_ = tf.matmul(y_, weights, name='dense' ) + bias
-	logits.append(y_)
-y_ = outputY = tf.pack(logits)
+	y_ = outputY = tf.matmul(output, weights, name='dense' ) + bias
 
-# optimize
-y=target=tf.placeholder(tf.float32, shape=(batch_size, max_word_length, classes)) # -> seq2seq!
+	cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_, y[:,i,:]), name="cost")  # prediction, target
+	costs.append(cost)
+	logits.append(y_)
+costs=tf.reduce_sum(costs)
+# y_ = outputY = tf.pack(logits)
 
 # targetIxs = tf.placeholder(tf.int64, shape=(batch_size, None),name="indices")
 # targetVals = tf.placeholder(tf.int32,name="values")
@@ -84,10 +92,10 @@ y=target=tf.placeholder(tf.float32, shape=(batch_size, max_word_length, classes)
 # seqLengths=[20]*batch_size
 # cost = tf.reduce_mean(ctc.ctc_loss(logits3d, targetY, seqLengths))
 # if 1D:
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_,y),name="cost")  # prediction, target
 tf.summary.scalar('cost', cost)
-optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
-prediction = y_
+tf.summary.scalar('costs', costs)
+optimizer = tf.train.AdamOptimizer(learning_rate).minimize(costs)
+# prediction = y_
 
 # Evaluate model
 # correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
