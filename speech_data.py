@@ -202,7 +202,7 @@ def spectro_batch_generator(batch_size=10,width=64,source_data=Source.DIGIT_SPEC
 			image = skimage.io.imread(path + "/" + image_name).astype(numpy.float32)
 			# image.resize(width,height) # lets see ...
 			data = image / 255.  # 0-1 for Better convergence
-			data = data.reshape([width * height])  # tensorflow matmul needs flattened matrices wtf
+			# data = data.reshape([width * height])  # tensorflow matmul needs flattened matrices wtf
 			batch.append(list(data))
 			# classe=(ord(image_name[0]) - 48)  # -> 0=0 .. A:65-48 ... 74 for 'z'
 			classe = (ord(image_name[0]) - 48) % 32# -> 0=0  17 for A, 10 for z ;)

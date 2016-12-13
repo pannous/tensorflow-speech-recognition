@@ -27,11 +27,10 @@ max_word_length = 20  # max length of output (characters per word)
 
 keep_prob=dropout=0.7
 
-# batch = speech_data.mfcc_batch_generator(batch_size, target=Target.word)  # labels_values is not a vector
-batch = speech_data.mfcc_batch_generator(batch_size, target=Target.hotword)  # labels_indices is not a matrix
+# batch = speech_data.mfcc_batch_generator(batch_size, target=Target.word)
+batch = speech_data.mfcc_batch_generator(batch_size, source=Source.WORD_WAVES, target=Target.hotword)
 X,Y=next(batch)
-# print(Y)
-print(np.array(Y).shape)
+print("lable shape",np.array(Y).shape)
 
 # inputs=tf.placeholder(tf.float32, shape=(batch_size,max_length,features))
 x= inputX=inputs=tf.placeholder(tf.float32, shape=(batch_size, features, max_input_length))
@@ -146,7 +145,7 @@ while step < steps:
 		feed = {x: batch_xs, y: batch_ys} #, keep_prob: 1., train_phase: False}
 		acc, summary = session.run([accuracy, summaries], feed_dict=feed)
 		# summary_writer.add_summary(summary, step) # only test summaries for smoother curve
-		print("\rStep {:d} Loss= {:.6f} Fit= {:.3f} Time= {:d}s".format(step, loss, acc, seconds), end=' ')
+		print("\rStep {:d} Loss={:.4f} Fit={:.1f}% Time={:d}s".format(step, loss, acc, seconds), end=' ')
 		if str(loss) == "nan":
 			print("\nLoss gradiant explosion, quitting!!!")  # restore!
 			quit(0)
