@@ -128,6 +128,7 @@ try:summary_writer = tf.summary.FileWriter("logs", session.graph)  #
 except:summary_writer = tf.train.SummaryWriter("logs", session.graph)  # tf<12
 while step < steps:
 	batch_xs, batch_ys = next(batch)
+
 	# tf.train.shuffle_batch_join(example_list, batch_size, capacity=min_queue_size + batch_size * 16, min_queue_size)
 	# Fit training using batch data
 	feed_dict = {x: batch_xs, y: batch_ys}
