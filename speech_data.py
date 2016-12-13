@@ -68,12 +68,12 @@ offset = 64  # starting with characters
 max_word_length = 20
 terminal_symbol = 0
 
-def pad(vec, pad_to=max_word_length, one_hot=False):
+def pad(vec, pad_to=max_word_length, one_hot=False,paddy=terminal_symbol):
 	for i in range(0, pad_to - len(vec)):
 		if one_hot:
-			vec.append([terminal_symbol] * num_characters)
+			vec.append([paddy] * num_characters)
 		else:
-			vec.append(terminal_symbol)
+			vec.append(paddy)
 	return vec
 
 def char_to_class(c):
@@ -228,8 +228,8 @@ def mfcc_batch_generator(batch_size=10, source=Source.DIGIT_WAVES, target=Target
 			if target==Target.speaker: label=one_hot_from_item(speaker(file), speakers)
 			elif target==Target.digits:  label=dense_to_one_hot(int(file[0]),10)
 			elif target==Target.first_letter:  label=dense_to_one_hot((ord(file[0]) - 48) % 32,32)
-			elif target == Target.hotword: label = one_hot_word(file, pad_to=20)  # max_output_length
-			elif target == Target.word: label=string_to_int_word(file, pad_to=20)
+			elif target == Target.hotword: label = one_hot_word(file, pad_to=max_word_length)  #
+			elif target == Target.word: label=string_to_int_word(file, pad_to=max_word_length)
 				# label = file  # sparse_labels(file, pad_to=20)  # max_output_length
 			else: raise Exception("todo : labels for Target!")
 			labels.append(label)
@@ -383,8 +383,7 @@ def one_hot_word(word,pad_to=max_word_length):
 		x = [0] * num_characters
 		x[(ord(c) - offset)%num_characters]=1
 		vec.append(x)
-	# print(vec)
-	# print(many_hot_to_word(vec))
+	if pad_to:vec=pad(vec, pad_to, one_hot=True)
 	return vec
 
 def many_hot_to_word(word):
