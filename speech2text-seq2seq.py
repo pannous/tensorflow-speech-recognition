@@ -10,9 +10,13 @@ import speech_data
 from speech_data import Source,Target
 from layer import net
 
+Update:
+# tf.nn.seq2se doesn't work as hoped: It needs a 1D Tensor (chars) as input, not 2D spectrogram/mfcc/... unless we feed it with very long 1D wave data, but that is probably not what seq2seq was intended to for. Fear not: 1D dilated convolution and LSTMs together with CTC are just fine.
+
 learning_rate = 0.00001
 training_iters = 300000 #steps
 batch_size = 64
+
 
 
 input_classes=20 # mfcc features
@@ -81,8 +85,6 @@ saver = tf.train.Saver(tf.all_variables())
 tf.sg_train(log_interval=30, lr=0.0001, loss=loss, ep_size=1000, max_ep=200, early_stop=False)
 
 
-
-Update: tf.nn.seq2seq does't work as hoped: It needs a 1D Tensor (chars) as input, not 2D spectrogram/mfcc/... unless we feed it with very long 1D wave data, but that is probably not what seq2seq was intended to for. Fear not: 1D dilated convolution and LSTMs together with CTC are just fine.
 
 # tf.nn.seq2seq DOES'T WORK: NEEDS 1D Tensor (chars) as input, not mfcc
 # class SpeechSeq2Seq(object):
