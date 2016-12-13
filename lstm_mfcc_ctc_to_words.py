@@ -19,9 +19,11 @@ learning_rate = 0.0001
 training_iters = 300000 #steps
 batch_size = 64
 
-width=features=20 # mfcc features
-height=max_length=80 # (max) length of utterance
-classes=10 # digits
+width=features=20 # mfcc input features
+height=max_input_length=80 # (max) length of input utterance (mfcc slices)
+classes = num_characters = 32
+max_word_length = 20  # max length of output (characters per word)
+# classes=10 # digits
 
 keep_prob=dropout=0.7
 
@@ -32,11 +34,11 @@ X,Y=next(batch)
 print(np.array(Y).shape)
 
 # inputs=tf.placeholder(tf.float32, shape=(batch_size,max_length,features))
-x= inputX=inputs=tf.placeholder(tf.float32, shape=(batch_size,features,max_length))
+x= inputX=inputs=tf.placeholder(tf.float32, shape=(batch_size, features, max_input_length))
 # inputs = tf.transpose(inputs, [0, 2, 1]) #  inputs must be a `Tensor` of shape: `[batch_size, max_time, ...]`
 inputs = tf.transpose(inputs, [2, 0, 1]) # [max_time, batch_size, features] to split:
 # Split data because rnn cell needs a list of inputs for the RNN inner loop
-inputs = tf.split(0, max_length, inputs)  # n_steps * (batch_size, features)
+inputs = tf.split(0, max_input_length, inputs)  # n_steps * (batch_size, features)
 
 num_hidden = 100 #features
 cell = tf.nn.rnn_cell.LSTMCell(num_hidden, state_is_tuple=True)
@@ -60,20 +62,23 @@ else:
 	# y_=outputs[-1]
 
 # dense
-weights = tf.Variable(tf.random_uniform([num_hidden, classes], minval=-1. / width, maxval=1. / width), name="weights_dense")
-bias = tf.Variable(tf.random_uniform([classes], minval=-1. / width, maxval=1. / width), name="bias_dense")
-# y_ = tf.matmul(y_, weights, name='dense' ) + bias
-y_ = logits = outputs
+logits=[]
+for output in outputs:
+	weights = tf.Variable(tf.random_uniform([num_hidden, classes], minval=-1. / width, maxval=1. / width), name="weights_dense")
+	bias = tf.Variable(tf.random_uniform([classes], minval=-1. / width, maxval=1. / width), name="bias_dense")
+	y_ = tf.matmul(y_, weights, name='dense' ) + bias
+	logits.append(y_)
+y_ = outputY = tf.pack(logits)
 
 # optimize
-y=target=tf.placeholder(tf.float32, shape=(batch_size,None,32)) # -> seq2seq!
+y=target=tf.placeholder(tf.float32, shape=(batch_size, max_word_length, classes)) # -> seq2seq!
+
 # targetIxs = tf.placeholder(tf.int64, shape=(batch_size, None),name="indices")
 # targetVals = tf.placeholder(tf.int32,name="values")
 # targetShape = tf.placeholder(tf.int64,name="targetShape")
 # targetY = tf.SparseTensor(targetIxs, targetVals, targetShape)
 
 ####Optimizing
-y_ = tf.pack(logits)
 # logits=y_
 # logits3d = tf.pack(logits)
 # seqLengths=[20]*batch_size
