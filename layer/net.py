@@ -176,7 +176,7 @@ class net():
 		# self.add(tf.nn.SpatialConvolution(nChannels, nOutChannels, 1, 1, 1, 1, 0, 0))
 
 	# Densely Connected Convolutional Networks https://arxiv.org/abs/1608.06993
-	def buildDenseConv(self,N_blocks=3):
+	def buildDenseConv(self,N_blocks=3,magic_factor=1):
 		depth = 3 * N_blocks + 4
 		if  (depth - 4) % 3 :  raise Exception("Depth must be 3N + 4! (4,7,10,...) ")  # # layers in each denseblock
 		N = (depth - 4) / 3
@@ -211,8 +211,10 @@ class net():
 		# self.add(tf.nn.max_pool(self.last_layer, ksize=[1, 4, 4, 1], strides=[1, 1, 1, 1], padding='SAME'))
 		self.add(tf.nn.max_pool(self.last_layer, ksize=[1, 4, 4, 1], strides=[1, 2, 2, 1], padding='SAME'))
 		# self.add(tf.nn.SpatialAveragePooling(8, 8)).add(nn.Reshape(nChannels))
-		self.reshape([-1,nChannels*4]) # ready for classification
-		# self.reshape([-1, nChannels * 16])  # ready for classification
+		if magic_factor==16:
+			self.reshape([-1, nChannels * 16])  # ready for classification
+		else:
+			self.reshape([-1,nChannels*4]) # ready for classification
 
 	# Fully connected layer
 	def dense(self, hidden=1024, depth=1, activation=tf.nn.tanh, dropout=False, parent=-1, norm=None): #

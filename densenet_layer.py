@@ -4,7 +4,6 @@ import tensorflow as tf
 import layer
 import speech_data
 from speech_data import Source,Target
-from layer import net
 
 
 learning_rate = 0.001
@@ -39,7 +38,7 @@ def denseConv(net):
 	# type: (layer.net) -> None
 	print("Building dense-net")
 	net.reshape(shape=[-1, 64, 64, 1])  # Reshape input picture
-	net.buildDenseConv(N_blocks=1)
+	net.buildDenseConv(N_blocks=1, magic_factor = 16)
 	net.classifier() # auto classes from labels
 
 
@@ -53,9 +52,9 @@ def denseNet(net):
 
 train_digits=True
 if train_digits:
-	width=64 # for pcm baby data
+	width= height=64 # for pcm baby data
 	batch=speech_data.spectro_batch_generator(1000,target=speech_data.Target.digits)
-	classes=10
+	classes=10 # digits
 else:
 	width=512 # for spoken_words overkill data
 	classes=74 #
@@ -64,10 +63,11 @@ else:
 
 X,Y=next(batch)
 
-# CHOSE MODEL ARCHITECTURE HERE:
-net=layer.net(simple_dense,data=batch, input_width=width, output_width=classes, learning_rate=0.01)
-# net=layer.net(model=alex,input_width=64*64,output_width=10, learning_rate=0.001)
-# net=layer.net(model=denseConv,input_width=64*64,output_width=10, learning_rate=0.001)
+# CHOOSE MODEL ARCHITECTURE HERE:
+# net = layer.net(simple_dense, data=batch, input_width=width, output_width=classes, learning_rate=0.01)
+net = layer.net(simple_dense, data=batch, input_shape=(width,height), output_width=classes, learning_rate=0.01)
+# net=layer.net(model=alex,input_shape=(width, height),output_width=10, learning_rate=learning_rate)
+# net=layer.net(model=denseConv, input_shape=(width, height),output_width=10, learning_rate=learning_rate)
 
 net.train(data=batch,batch_size=10,steps=500,dropout=0.6,display_step=1,test_step=1) # debug
 # net.train(data=batch,batch_size=10,steps=5000,dropout=0.6,display_step=5,test_step=20) # test
@@ -76,3 +76,4 @@ net.train(data=batch,batch_size=10,steps=500,dropout=0.6,display_step=1,test_ste
 # net.predict() # nil=random
 # net.generate(3)  # nil=random
 
+print ("Now try switiching between model architectures in line 68-71")
