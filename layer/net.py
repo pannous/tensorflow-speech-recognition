@@ -122,11 +122,11 @@ class net():
 				weights = tf.Variable(tf.random_uniform([inputs_width, width],minval=-1./width,maxval=1./width), name="weights")
 				bias = tf.Variable(tf.random_uniform([width],minval=-1./width,maxval=1./width), name="bias") # auto nr + context
 				dense1 = tf.matmul(inputs, weights, name='dense_'+str(nr))+ bias
-				tf.histogram_summary('dense_'+str(nr),dense1)
-				tf.histogram_summary('dense_'+str(nr)+'/sparsity', tf.nn.zero_fraction(dense1))
-				tf.histogram_summary('weights_'+str(nr),weights)
-				tf.histogram_summary('weights_'+str(nr)+'/sparsity', tf.nn.zero_fraction(weights))
-				tf.histogram_summary('bias_'+str(nr),bias)
+				tf.summary.histogram('dense_'+str(nr),dense1)
+				tf.summary.histogram('dense_'+str(nr)+'/sparsity', tf.nn.zero_fraction(dense1))
+				tf.summary.histogram('weights_'+str(nr),weights)
+				tf.summary.histogram('weights_'+str(nr)+'/sparsity', tf.nn.zero_fraction(weights))
+				tf.summary.histogram('bias_'+str(nr),bias)
 
 
 				if act: dense1 = act(dense1)
@@ -240,11 +240,11 @@ class net():
 					weights = tf.Variable(tf.random_uniform([self.last_width, width], minval=-1. / width, maxval=1. / width), name="weights_dense")
 				bias = tf.Variable(tf.random_uniform([width],minval=-1./width,maxval=1./width), name="bias_dense")
 				dense1 = tf.matmul(parent, weights, name='dense_'+str(nr))+ bias
-				tf.histogram_summary('dense_'+str(nr),dense1)
-				tf.histogram_summary('weights_'+str(nr),weights)
-				tf.histogram_summary('bias_'+str(nr),bias)
-				tf.histogram_summary('dense_'+str(nr)+'/sparsity', tf.nn.zero_fraction(dense1))
-				tf.histogram_summary('weights_'+str(nr)+'/sparsity', tf.nn.zero_fraction(weights))
+				tf.summary.histogram('dense_' + str(nr), dense1)
+				tf.summary.histogram('weights_' + str(nr), weights)
+				tf.summary.histogram('bias_' + str(nr), bias)
+				tf.summary.histogram('dense_' + str(nr) + '/sparsity', tf.nn.zero_fraction(dense1))
+				tf.summary.histogram('weights_' + str(nr) + '/sparsity', tf.nn.zero_fraction(weights))
 				if activation: dense1 = activation(dense1)
 				if norm: dense1 = self.norm(dense1,lsize=1)
 				if dropout: dense1 = tf.nn.dropout(dense1, self.keep_prob)
@@ -277,11 +277,11 @@ class net():
 
 			# # conv1 = conv2d('conv', _X, _weights, _bias)
 			conv1=tf.nn.bias_add(tf.nn.conv2d(self.last_layer,filter=filters, strides=[1, 1, 1, 1], padding='SAME'), _bias)
-			if debug: tf.histogram_summary('conv_' + str(len(self.layers)), conv1)
+			if debug: tf.summary.histogram('conv_' + str(len(self.layers)), conv1)
 			if act: conv1=act(conv1)
 			if pool: conv1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 			if norm: conv1 = tf.nn.lrn(conv1, depth_radius=4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
-			if debug: tf.histogram_summary('norm_' + str(len(self.layers)), conv1)
+			if debug: tf.summary.histogram('norm_' + str(len(self.layers)), conv1)
 			if dropout: conv1 = tf.nn.dropout(conv1,self.keep_prob)
 			print("output shape ",conv1.get_shape())
 			self.add(conv1)
@@ -325,18 +325,18 @@ class net():
 				self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y, y_)) # prediction, target
 
 			# if not gpu:
-			with tf.device(_cpu):tf.scalar_summary('cost', self.cost)
+			with tf.device(_cpu):tf.summary.scalar('cost', self.cost)
 			# self.cost = tf.Print(self.cost , [self.cost ], "debug cost : ")
 			# learning_scheme=self.learning_rate
 			learning_scheme=tf.train.exponential_decay(self.learning_rate, self.global_step, decay_steps, decay_size,staircase=True)
-			with tf.device(_cpu):tf.scalar_summary('learning_rate', learning_scheme)
+			with tf.device(_cpu):tf.summary.scalar('learning_rate', learning_scheme)
 			self.optimizer = tf.train.AdamOptimizer(learning_scheme).minimize(self.cost)
 			# self.optimizer = NeuralOptimizer(data=None, learning_rate=0.01, shared_loss=self.cost).minimize(self.cost) No good
 
 			# Evaluate model
 			correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.target, 1))
 			self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-			if not gpu: tf.scalar_summary('accuracy', self.accuracy)
+			if not gpu: tf.summary.scalar('accuracy', self.accuracy)
 			# Launch the graph
 
 	def next_batch(self,batch_size,session,test=False):
@@ -362,13 +362,16 @@ class net():
 		# import tensorflow.contrib.layers as layers
 		# t = tf.verify_tensor_all_finite(t, msg)
 		tf.add_check_numerics_ops()
-		self.summaries = tf.merge_all_summaries()
-		self.summary_writer = tf.train.SummaryWriter(current_logdir(), session.graph) #
+		try: self.summaries = tf.summary.merge_all()
+		except:self.summaries = tf.merge_all_summaries()
+		try:self.summary_writer = tf.summary.FileWriter(current_logdir(), session.graph)  #
+		except: self.summary_writer = tf.train.SummaryWriter(current_logdir(), session.graph) #
 		if not dropout:dropout=1. # keep all
 		x=self.x
 		y=self.y
 		keep_prob=self.keep_prob
-		saver = tf.train.Saver(tf.all_variables())
+		try:saver = tf.train.Saver(tf.global_variables())
+		except:saver = tf.train.Saver(tf.all_variables())
 		snapshot = self.name + str(get_last_tensorboard_run_nr())
 		checkpoint = tf.train.latest_checkpoint(checkpoint_dir)
 		if do_resume and checkpoint:
