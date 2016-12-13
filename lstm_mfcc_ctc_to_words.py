@@ -134,7 +134,7 @@ while step < steps:
 	feed_dict = {x: batch_xs, y: batch_ys}
 	# feed_dict = {inputX: batch_xs, targetIxs: batch_ys.indices, targetVals: batch_ys.values,targetShape: 20}
 	#, seqLengths: batchSeqLengths
-	loss, _ = session.run([cost, optimizer], feed_dict=feed_dict)
+	loss, _ = session.run([costs, optimizer], feed_dict=feed_dict)
 	if step % display_step == 0:
 		seconds = int(time.time()) - start
 		# Calculate batch accuracy, loss
