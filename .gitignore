@@ -6,7 +6,7 @@ OLD/
 logs/
 checkpoints
 *.pyc
-
+*/*.pyc
 sugartensor
 extensions.py
 extension_functions.py
