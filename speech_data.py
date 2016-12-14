@@ -124,7 +124,7 @@ def progresshook(blocknum, blocksize, totalsize):
 		else: # total size is unknown
 				sys.stderr.write("read %d\n" % (readsofar,))
 
-def maybe_download(file, work_directory="/data/speech/"):
+def maybe_download(file, work_directory=DATA_DIR):
 	"""Download the data from Pannous's website, unless it's already here."""
 	print("Looking for data %s in %s"%(file,work_directory))
 	if not os.path.exists(work_directory):
@@ -153,6 +153,8 @@ def speaker(filename):  # vom Dateinamen
 	return filename.split("_")[1]
 
 def get_speakers(path=pcm_path):
+	maybe_download(Source.DIGIT_SPECTROS)
+	maybe_download(Source.DIGIT_WAVES)
 	files = os.listdir(path)
 	def nobad(name):
 		return "_" in name and not "." in name.split("_")[1]
