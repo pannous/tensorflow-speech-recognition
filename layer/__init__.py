@@ -1,4 +1,5 @@
 from .net import *  # py3
+from .tensorboard_util import *
 
 # PyCharm horrible auto-complete if separated into different modules
 # from conv import *
