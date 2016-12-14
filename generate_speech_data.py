@@ -1,9 +1,9 @@
 import os
 
 import librosa #mfcc 1.st lib
-# from scikits.talkbox.features import mfcc # 2'nd lib
+from scikits.talkbox.features import mfcc # 2'nd lib
+# import python_speech_features # 3rd lib
 import os.path
-import python_speech_features
 import numpy as np
 import subprocess
 
@@ -14,7 +14,6 @@ good_voices = """
 Agnes
 Alex
 Allison
-Ava
 Daniel
 Fred
 Junior
@@ -28,13 +27,14 @@ Princess
 Ralph
 Samantha
 Serena
-Susan
 Tessa
 Tom
 Veena
 Vicki
 Victoria
 """.split()
+# Ava Susan not found.
+
 
 bad_voices = """
 Albert
@@ -130,23 +130,23 @@ def generate_mfcc(voice, word, rate, path):
 	signal, sample_rate = librosa.load(filename, mono=True)
 	# mel_features = librosa.feature.mfcc(signal, sample_rate)
 	# sample_rate, wave = scipy.io.wavfile.read(filename) # 2nd lib
-	# mel_features, mspec, spec = mfcc(wave, fs=sample_rate, nceps=20)
-	mel_features=python_speech_features.mfcc(signal, numcep=26, nfilt=26*2,samplerate=sample_rate) # 3rd lib
+	mel_features, mspec, spec = mfcc(signal, fs=sample_rate, nceps=26)
+	# mel_features=python_speech_features.mfcc(signal, numcep=26, nfilt=26*2,samplerate=sample_rate) # 3rd lib
 	# print len(mel_features)
 	# print len(mel_features[0])
 	# print("---")
+	mel_features=np.swapaxes(mel_features,0,1)# timesteps x nFeatures -> nFeatures x timesteps
 	np.save(path + "/mfcc/%s_%s_%d.npy" % (word,voice,rate), mel_features)
 
 def generate_chars(voice, word, rate, path):
 	chars = string_to_int_word(word) # todo : softlink!
 	# os.symlink("%d.npy","%s_%s_%d.npy" % (word, voice, rate))
-	# np.save(path + "/chars/%s_%s_%d.npy" % (word, voice, rate), chars)
-
+	np.save(path + "/chars/%s_%s_%d.npy" % (word, voice, rate), chars)
 
 def generate_phonemes(word,  path):
 	pronounced=subprocess.check_output(["./word_to_phonemes.swift", word]).decode('UTF-8').strip()
-	word = pronounced #hack for numbers!
-	chars= string_to_int_word( word ,pad_to=max_word_length)
+	chars = string_to_int_word(pronounced, pad_to=max_word_length)  # hack for numbers!
+	# chars = string_to_int_word(word, pad_to=max_word_length)
 	np.save(path + "/chars/%s.npy"%word, chars)
 	# phonemes= pronounced_to_phoneme_class(pronounced)
 	# np.save(path + "/phones/%s.npy"%word, phonemes)
@@ -161,6 +161,7 @@ def generate(words, path):
 	if not os.path.exists(path): os.mkdir(path)
 	if not os.path.exists(path + "/chars/"): os.mkdir(path + "/chars/")
 	if not os.path.exists(path + "/mfcc/"): os.mkdir(path + "/mfcc/")
+	if not os.path.exists(path + "/ogg/"): os.mkdir(path + "/ogg/")
 	out=open(path + "/words.list", "wt")
 	for word in words:
 		if isinstance(word, bytes):
@@ -169,6 +170,7 @@ def generate(words, path):
 		out.write("%s\n"%word)
 		generate_phonemes(word, path)
 		rate=120
+		# for rate in range(80,360,step=20):
 		for voice in good_voices:
 			try:
 				generate_chars(voice, word, rate, path)

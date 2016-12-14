@@ -83,19 +83,22 @@ for i in range(0, max_word_length):
 	accuraci = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 	accuracy+= accuraci
 
-costs=tf.reduce_sum(costs)*10
+# costs=tf.reduce_sum(costs)*10
 # y_ = outputY = tf.pack(logits)
 
 # targetIxs = tf.placeholder(tf.int64, shape=(batch_size, None),name="indices")
 # targetVals = tf.placeholder(tf.int32,name="values")
 # targetShape = tf.placeholder(tf.int64,name="targetShape")
 # targetY = tf.SparseTensor(targetIxs, targetVals, targetShape)
+targetY = tf.SparseTensor()
 
 ####Optimizing
-# logits=y_
-# logits3d = tf.pack(logits)
-# seqLengths=[20]*batch_size
-# cost = tf.reduce_mean(ctc.ctc_loss(logits3d, targetY, seqLengths))
+logits=y_
+logits3d = tf.pack(logits)
+seqLengths=[20]*batch_size
+cost = tf.reduce_mean(ctc.ctc_loss(logits3d, targetY, seqLengths))
+# CTCLoss op expects the reserved blank label to be the largest value! REALLY?
+
 # if 1D:
 tf.summary.scalar('cost', cost)
 tf.summary.scalar('costs', costs)
