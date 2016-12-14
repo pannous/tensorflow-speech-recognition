@@ -19,7 +19,7 @@ from tensorflow.python.ops.rnn import bidirectional_rnn
 import numpy as np
 import re
 
-from bdlstm_utils import load_batched_data
+from bdlstm_utils import load_ed_data
 
 INPUT_PATH = '/data/ctc/sample_data/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
 TARGET_PATH = '/data/ctc/sample_data/char_y/'  # directory of nCharacters 1-D array .npy files
@@ -34,44 +34,54 @@ TARGET_PATH = '/data/ctc/sample_data/char_y/'  # directory of nCharacters 1-D ar
 #  'H', 'V', 'M', '@', 'O', 'D', 'N', 'L', 'S', 'O', 'L', '@', 'O', 'E', 'V', 'O', 'S', 'Y', 'D', '@', 'O', 'Z', 'N', 'L',
 #  'Z', 'A', '@', 'D', 'N', 'Z', '@', 'D', 'N', 'Z', '@', 'Z', 'V', 'Y', 'E', 'L', '@', 'C', 'D', 'V', 'N', 'L', '@', 'L',
 #  'U', 'D', '@', 'L', 'U', 'D']
-
-INPUT_PATH = 'data/number/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
-TARGET_PATH = 'data/number/chars/'  # directory of nCharacters 1-D array .npy files
+# our_data=True
+our_data = False
+if our_data:
+	INPUT_PATH = 'data/number/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
+	TARGET_PATH = 'data/number/chars/'  # directory of nCharacters 1-D array .npy files
+	# we have 0.npy : ~ zEeRo : array([31, 26, 17,  9, 25, 18, 15, 23, 14,  0, ... ]) should be fine?
 
 ####Learning Parameters
 learningRate = 0.001
 momentum = 0.9
 nEpochs = 300
-batchSize = 4
+Size = 4
 
 ####Network Parameters
-nFeatures = 26  # 12 MFCC coefficients + energy, and derivatives
-# nFeatures = 20  # 20 MFCC coefficients + ^^ WHERE DID YOU GET THOSE?
-nHidden = 128
-nClasses = 28  # 27 characters, plus the "blank" for CTC
 
+nFeatures = 26  # 12 MFCC coefficients + energy, and derivatives
+nClasses = 28  # 27 characters, plus the "blank" for CTC
+if our_data:
+	nFeatures = 26  # 20 MFCC coefficients + ^^ WHERE DID YOU GET THOSE?
+	nClasses = 32 # forgot why ;)
+
+nHidden = 128
 ####Load data
 print('Loading data')
-batchedData, maxTimeSteps, totalN, nClasses2 = load_batched_data(INPUT_PATH, TARGET_PATH, batchSize)
+edData, maxTimeSteps, totalN, _ = load_ed_data(INPUT_PATH, TARGET_PATH, Size,match=our_data)
 
 ####Define graph
 print('Defining graph')
+print('This takes forever + some')
+print('Impossible to debug')
+print('It is slower than any other tensorflow graph, why?')
+
 graph = tf.Graph()
 with graph.as_default():
 	####NOTE: try variable-steps inputs and dynamic bidirectional rnn, when it's implemented in tensorflow
 
 	####Graph input
-	inputX = tf.placeholder(tf.float32, shape=(maxTimeSteps, batchSize, nFeatures))
+	inputX = tf.placeholder(tf.float32, shape=(maxTimeSteps, Size, nFeatures))
 	# Prep input data to fit requirements of rnn.bidirectional_rnn
-	#  Reshape to 2-D tensor (nTimeSteps*batchSize, nfeatures)
+	#  Reshape to 2-D tensor (nTimeSteps*Size, nfeatures)
 	inputXrs = tf.reshape(inputX, [-1, nFeatures])
-	#  Split to get a list of 'n_steps' tensors of shape (batch_size, n_hidden)
+	#  Split to get a list of 'n_steps' tensors of shape (_size, n_hidden)
 	inputList = tf.split(0, maxTimeSteps, inputXrs)
 	targetIxs = tf.placeholder(tf.int64)
 	targetVals = tf.placeholder(tf.int32)
 	targetShape = tf.placeholder(tf.int64)
 	targetY = tf.SparseTensor(targetIxs, targetVals, targetShape)
-	seqLengths = tf.placeholder(tf.int32, shape=batchSize)
+	seqLengths = tf.placeholder(tf.int32, shape=Size)
 
 	####Weights & biases
 	stddev = np.sqrt(2.0 / (2 * nHidden))
@@ -88,7 +98,7 @@ with graph.as_default():
 	forwardH1 = rnn_cell.LSTMCell(nHidden, use_peepholes=True, state_is_tuple=True)
 	backwardH1 = rnn_cell.LSTMCell(nHidden, use_peepholes=True, state_is_tuple=True)
 	fbH1, _, _ = bidirectional_rnn(forwardH1, backwardH1, inputList, dtype=tf.float32, scope='BDLSTM_H1')
-	fbH1rs = [tf.reshape(t, [batchSize, 2, nHidden]) for t in fbH1]
+	fbH1rs = [tf.reshape(t, [Size, 2, nHidden]) for t in fbH1]
 	outH1 = [tf.reduce_sum(tf.mul(t, weightsOutH1), reduction_indices=1) + biasesOutH1 for t in fbH1rs]
 
 	logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in outH1]
@@ -104,13 +114,18 @@ with graph.as_default():
 	reduced_sum = tf.reduce_sum(tf.edit_distance(predictions, targetY, normalize=False))
 	errorRate = reduced_sum / tf.to_float(tf.size(targetY.values))
 
+	check_op = tf.add_check_numerics_ops()
+
 ####Run session
 with tf.Session(graph=graph) as session:
-	merged = tf.merge_all_summaries()
-	writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
-	# writer = tf.summary.FileWriter("/tmp/basic_new", session.graph)
+	try: merged = tf.summary.merge_all()
+	except: merged = tf.merge_all_summaries()
+	try:writer = tf.summary.FileWriter("/tmp/basic_new", session.graph)
+	except: writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
 	try:saver = tf.train.Saver()  # defaults to saving all variables
-	except: print("tf.train.Saver() broken in tensorflow 0.12")
+	except:
+		print("tf.train.Saver() broken in tensorflow 0.12")
+		saver = tf.train.Saver(tf.all_variables())# WTF stupid API breaking
 	ckpt = tf.train.get_checkpoint_state('./checkpoints')
 
 	start = 0
@@ -125,24 +140,24 @@ with tf.Session(graph=graph) as session:
 		print("Model %d restored." % start)
 	else:
 		print('Initializing')
-		session.run(tf.initialize_all_variables())
+		try: session.run(tf.global_variables_initializer())
+		except:session.run(tf.initialize_all_variables())
 	for epoch in range(nEpochs):
 		print('Epoch', epoch + 1, '...')
-		batchErrors = np.zeros(len(batchedData))
-		batchRandIxs = np.random.permutation(len(batchedData))  # randomize batch order
-		for batch, batchOrigI in enumerate(batchRandIxs):
-			batchInputs, batchTargetSparse, batchSeqLengths = batchedData[batchOrigI]
-			batchTargetIxs, batchTargetVals, batchTargetShape = batchTargetSparse
-			feedDict = {inputX: batchInputs, targetIxs: batchTargetIxs, targetVals: batchTargetVals,
-			            targetShape: batchTargetShape, seqLengths: batchSeqLengths}
-			_, l, er, lmt = session.run([optimizer, loss, errorRate, logitsMaxTest], feed_dict=feedDict)
+		errors = np.zeros(len(edData))
+		RandIxs = np.random.permutation(len(edData))  # randomize  order
+		for Nr, OrigI in enumerate(RandIxs):
+			Inputs, TargetSparse, SeqLengths = edData[OrigI]
+			indices, values, shape = TargetSparse
+			feedDict = {inputX: Inputs, targetIxs: indices, targetVals: values, targetShape: shape, seqLengths: SeqLengths}
+			_, l, er, lmt, ok = session.run([optimizer, loss, errorRate, logitsMaxTest, check_op], feed_dict=feedDict)
 			print(np.unique(lmt))
-			# print unique argmax values of first sample in batch; should be blank for a while, then spit out target values
-			if (batch % 1) == 0:
-				print('Minibatch', batch, '/', batchOrigI, 'loss:', l)
-				print('Minibatch', batch, '/', batchOrigI, 'error rate:', er)
-			batchErrors[batch] = er * len(batchSeqLengths)
-		epochErrorRate = batchErrors.sum() / totalN
+			# print unique argmax values of first sample in ; should be blank for a while, then spit out target values
+			if (Nr % 1) == 0:
+				print('Mini', Nr, '/', OrigI, 'loss:', l)
+				print('Mini', Nr, '/', OrigI, 'error rate:', er)
+			errors[Nr] = er * len(SeqLengths)
+		epochErrorRate = errors.sum() / totalN
 		print('Epoch', epoch + 1, 'error rate:', epochErrorRate)
 		if saver:saver.save(session, 'checkpoints/model.ckpt', global_step=epoch + 1)
 	print('Learning finished')

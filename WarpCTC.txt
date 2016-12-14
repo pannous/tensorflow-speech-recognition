@@ -2,7 +2,7 @@ https://github.com/baidu-research/warp-ctc/tree/master/tensorflow_binding
 
 TensorFlow binding for WarpCTC
 
-This package provides TensorFlow kernels that wrap the WarpCTC library. Kernels are provided for both the CTCLoss op already in TensorFlow, as well as a new WarpCTC op provided in this package. The WarpCTC op has an interface that more closely matches the native WarpCTC interface than TensorFlow's CTCLoss op. Note that the CTCLoss op expects the reserved blank label to be the largest value while the WarpCTC op takes the reserved blank label value as an attribute which defaults to 0.
+This package provides TensorFlow kernels that Wrap the WarpCTC library;). Kernels are provided for both the CTCLoss op already in TensorFlow, as well as a new WarpCTC op provided in this package. The WarpCTC op has an interface that more closely matches the native WarpCTC interface than TensorFlow's CTCLoss op. Note that the CTCLoss op expects the reserved blank label to be the largest value while the WarpCTC op takes the reserved blank label value as an attribute which defaults to 0.
 Installation
 
 To build the kernels it is necessary to have the TensorFlow source code available, since TensorFlow doesn't currently install the necessary headers to handle the SparseTensor that the CTCLoss op uses to input the labels. You can retrieve the TensorFlow source from github.com:
