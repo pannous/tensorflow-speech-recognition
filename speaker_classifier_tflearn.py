@@ -1,3 +1,4 @@
+#!/usr/local/bin/python
 #!/usr/bin/env PYTHONIOENCODING="utf-8" python
 import tflearn
 import speech_data as data
