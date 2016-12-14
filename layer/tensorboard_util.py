@@ -1,14 +1,15 @@
 import os
 import subprocess  # NEW WAY!
 
-tensorboard_logs = '/tmp/tensorboard_logs/'
+# tensorboard_logs = '/tmp/tensorboard_logs/'
+tensorboard_logs = './logs/' # windows friendly
 global logdir
 
 def get_last_tensorboard_run_nr():
 	if not os.path.exists(tensorboard_logs ):
 		os.system("mkdir " + tensorboard_logs )
 		return 0
-	logs=subprocess.check_output(["ls", tensorboard_logs]).split("\n")
+	logs=subprocess.check_output(["ls", tensorboard_logs]).decode("utf-8").split("\n")
 	# print("logs: ",logs)
 	runs=map(lambda x: (not x.startswith("run") and -1) or int(x[-1]) ,logs)
 	# print("runs ",runs)
