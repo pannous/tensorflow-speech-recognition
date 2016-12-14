@@ -124,7 +124,7 @@ def progresshook(blocknum, blocksize, totalsize):
 		else: # total size is unknown
 				sys.stderr.write("read %d\n" % (readsofar,))
 
-def maybe_download(file, work_directory):
+def maybe_download(file, work_directory="/data/"):
 	"""Download the data from Pannous's website, unless it's already here."""
 	print("Looking for data %s in %s"%(file,work_directory))
 	if not os.path.exists(work_directory):
