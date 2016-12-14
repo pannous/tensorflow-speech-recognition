@@ -58,7 +58,7 @@ if our_data:
 nHidden = 128
 ####Load data
 print('Loading data')
-edData, maxTimeSteps, totalN, _ = load_ed_data(INPUT_PATH, TARGET_PATH, Size,match=our_data)
+edData, maxTimeSteps, totalN, _ = load_batched_data(INPUT_PATH, TARGET_PATH, Size,match=our_data)
 
 ####Define graph
 print('Defining graph')
