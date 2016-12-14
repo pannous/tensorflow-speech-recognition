@@ -19,7 +19,7 @@ from tensorflow.python.ops.rnn import bidirectional_rnn
 import numpy as np
 import re
 
-from bdlstm_utils import load_ed_data
+from bdlstm_utils import load_batched_data
 
 INPUT_PATH = '/data/ctc/sample_data/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
 TARGET_PATH = '/data/ctc/sample_data/char_y/'  # directory of nCharacters 1-D array .npy files
