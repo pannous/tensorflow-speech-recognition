@@ -37,6 +37,7 @@ TARGET_PATH = '/data/ctc/sample_data/char_y/'  # directory of nCharacters 1-D ar
 # our_data=True
 our_data = False
 if our_data:
+	print("Using our data")
 	INPUT_PATH = 'data/number/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
 	TARGET_PATH = 'data/number/chars/'  # directory of nCharacters 1-D array .npy files
 	# we have 0.npy : ~ zEeRo : array([31, 26, 17,  9, 25, 18, 15, 23, 14,  0, ... ]) should be fine?
@@ -97,24 +98,31 @@ with graph.as_default():
 	####Network
 	forwardH1 = rnn_cell.LSTMCell(nHidden, use_peepholes=True, state_is_tuple=True)
 	backwardH1 = rnn_cell.LSTMCell(nHidden, use_peepholes=True, state_is_tuple=True)
+	print("building bidirectional_rnn ... SLOW!!!")
 	fbH1, _, _ = bidirectional_rnn(forwardH1, backwardH1, inputList, dtype=tf.float32, scope='BDLSTM_H1')
+	print("done building rnn")
+	print("building fbH1rs ")
 	fbH1rs = [tf.reshape(t, [Size, 2, nHidden]) for t in fbH1]
+	print("building outH1 ")
 	outH1 = [tf.reduce_sum(tf.mul(t, weightsOutH1), reduction_indices=1) + biasesOutH1 for t in fbH1rs]
-
+	print("building logits ")
 	logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in outH1]
-
+	print("len(outH1) %d"% len(outH1))
 	####Optimizing
+	print("building loss")
 	logits3d = tf.pack(logits)
 	loss = tf.reduce_mean(ctc.ctc_loss(logits3d, targetY, seqLengths))
 	optimizer = tf.train.MomentumOptimizer(learningRate, momentum).minimize(loss)
 
 	####Evaluating
+	print("building Evaluation")
 	logitsMaxTest = tf.slice(tf.argmax(logits3d, 2), [0, 0], [seqLengths[0], 1])
 	predictions = tf.to_int32(ctc.ctc_beam_search_decoder(logits3d, seqLengths)[0][0])
 	reduced_sum = tf.reduce_sum(tf.edit_distance(predictions, targetY, normalize=False))
 	errorRate = reduced_sum / tf.to_float(tf.size(targetY.values))
 
 	check_op = tf.add_check_numerics_ops()
+print("done building graph")
 
 ####Run session
 with tf.Session(graph=graph) as session:
