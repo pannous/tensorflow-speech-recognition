@@ -140,7 +140,7 @@ def maybe_download(file, work_directory=DATA_DIR):
 		# os.system('ln -s '+work_directory)
 	if os.path.exists(filepath):
 		print('Extracting %s to %s' % ( filepath, work_directory))
-		os.system('tar xf '+filepath)
+		os.system('tar xf '+filepath+" -C "+work_directory)
 		print('Data ready!')
 	return filepath.replace(".tar","")
 
