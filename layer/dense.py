@@ -4,7 +4,7 @@ import layer
 class net(layer.net):
 
 	# Fully connected 'pyramid' layer, allows very high learning_rate!
-	def denseNet(self, hidden=20, depth=3, act=tf.nn.tanh, dropout=True): #
+	def fullDenseNet(self, hidden=20, depth=3, act=tf.nn.tanh, dropout=True): #
 		if(hidden>100):print("WARNING: denseNet uses quadratic mem for "+str(hidden))
 		if(depth<3):print("WARNING: did you mean to use Fully connected layer 'dense'? Expecting depth>3 vs "+str(depth))
 		inputs=self.last_layer

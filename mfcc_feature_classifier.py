@@ -56,7 +56,7 @@ def denseConv(net):
 	# type: (layer.net) -> None
 	print("Building dense-net")
 	net.reshape(shape)  # Reshape input picture
-	net.buildDenseConv(N_blocks=1)
+	net.buildDenseConv(nBlocks=1)
 	net.classifier() # auto classes from labels
 
 
