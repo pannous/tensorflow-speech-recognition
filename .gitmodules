@@ -1,0 +1,3 @@
+[submodule "tensorpeers"]
+	path = tensorpeers
+	url = git@github.com:pannous/tensorpeers.git
