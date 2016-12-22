@@ -1,3 +1,4 @@
+libtorrent
 #required
 tensorflow
 tflearn

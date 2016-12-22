@@ -41,7 +41,7 @@ Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that
 ###Extensions 
 **Extensions** to current tensorflow which are probably needed:
 * [WarpCTC on the GPU](https://github.com/baidu-research/warp-ctc/tree/master/tensorflow_binding)
-* Incremental collaborative snapshots ('P2P learning') !
+* Incremental collaborative snapshots ('[P2P learning](https://github.com/pannous/tensorpeers/tree/master)') !
 * Modular graphs/models + persistance
 <!-- ⤜(⨱ᴥ⨱)⤏ -->
 
