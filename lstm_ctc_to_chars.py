@@ -1,172 +1,174 @@
-#!/usr/bin/env python
-'''
-Example of a single-layer bidirectional long short-term memory network trained with
-connectionist temporal classification to predict character sequences from nFeatures x nFrames
-arrays of Mel-Frequency Cepstral Coefficients.  This is test code to run on the
-8-item data set in the "sample_data" directory, for those without access to TIMIT.
-
-Original Author: Jon Rein
-'''
-
-from __future__ import absolute_import
-from __future__ import division
+#!/usr/local/bin/python
 from __future__ import print_function
-
-import tensorflow as tf
-from tensorflow.python.ops import ctc_ops as ctc
-from tensorflow.python.ops import rnn_cell
-from tensorflow.python.ops.rnn import bidirectional_rnn
 import numpy as np
-import re
+import tensorflow as tf
+import speech_data
+from speech_data import Source, Target
+from tensorflow.python.ops import ctc_ops as ctc
+# import layer
+# from layer import net
+import time
 
-from bdlstm_utils import load_batched_data
+start = int(time.time())
+display_step = 1
+test_step = 10
+save_step = 100
+learning_rate = 0.0001
+# 0.0001 Step 300 Loss= 1.976625 Accuracy= 0.250 Time= 303s
+# Step 24261 Loss= 0.011786 Accuracy= 1.000 Time= 33762s takes time but works
 
-INPUT_PATH = '/data/ctc/sample_data/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
-TARGET_PATH = '/data/ctc/sample_data/char_y/'  # directory of nCharacters 1-D array .npy files
-# HUH?? >>> np.load("/data/ctc/sample_data/char_y/0.npy")
-# array([19, 15, 26, 2, 0, 18, 22, 18, 12, 2, 0, 18, 4, 16, 1, 0, 8,
-#        26, 17, 26, 14, 12, 2, 0, 8, 22, 13, 0, 15, 4, 14, 12, 19, 15,
-#        12, 0, 15, 5, 22, 15, 19, 25, 4, 0, 15, 26, 14, 12, 26, 1, 0,
-#        4, 14, 26, 0, 4, 14, 26, 0, 26, 22, 25, 5, 12, 0, 3, 4, 22,
-#        14, 12, 0, 12, 21, 4, 0, 12, 21, 4], dtype=uint8)
-# >> > map(lambda x: chr(x + 64), _)
-# ['S', 'O', 'Z', 'B', '@', 'R', 'V', 'R', 'L', 'B', '@', 'R', 'D', 'P', 'A', '@', 'H', 'Z', 'Q', 'Z', 'N', 'L', 'B', '@',
-#  'H', 'V', 'M', '@', 'O', 'D', 'N', 'L', 'S', 'O', 'L', '@', 'O', 'E', 'V', 'O', 'S', 'Y', 'D', '@', 'O', 'Z', 'N', 'L',
-#  'Z', 'A', '@', 'D', 'N', 'Z', '@', 'D', 'N', 'Z', '@', 'Z', 'V', 'Y', 'E', 'L', '@', 'C', 'D', 'V', 'N', 'L', '@', 'L',
-#  'U', 'D', '@', 'L', 'U', 'D']
-# our_data=True
-our_data = False
-if our_data:
-	print("Using our data")
-	INPUT_PATH = 'data/number/mfcc'  # directory of MFCC nFeatures x nFrames 2-D array .npy files
-	TARGET_PATH = 'data/number/chars/'  # directory of nCharacters 1-D array .npy files
-	# we have 0.npy : ~ zEeRo : array([31, 26, 17,  9, 25, 18, 15, 23, 14,  0, ... ]) should be fine?
+training_iters = 300000  # steps
+batch_size = 64
 
-####Learning Parameters
-learningRate = 0.001
-momentum = 0.9
-nEpochs = 300
-Size = 4
+width = features = 20  # mfcc input features
+height = max_input_length = 80  # (max) length of input utterance (mfcc slices)
+classes = num_characters = 32
+max_word_length = 20  # max length of output (characters per word)
+# classes=10 # digits
 
-####Network Parameters
+keep_prob = dropout = 0.7
 
-nFeatures = 26  # 12 MFCC coefficients + energy, and derivatives
-nClasses = 28  # 27 characters, plus the "blank" for CTC
-if our_data:
-	nFeatures = 26  # 20 MFCC coefficients + ^^ WHERE DID YOU GET THOSE?
-	nClasses = 32 # forgot why ;)
+# batch = speech_data.mfcc_batch_generator(batch_size, target=Target.word)
+batch = speech_data.mfcc_batch_generator(batch_size, source=Source.WORD_WAVES, target=Target.hotword)
+X, Y = next(batch)
+print("lable shape", np.array(Y).shape)
 
-nHidden = 128
-####Load data
-print('Loading data')
-edData, maxTimeSteps, totalN, _ = load_batched_data(INPUT_PATH, TARGET_PATH, Size,match=our_data)
+# inputs=tf.placeholder(tf.float32, shape=(batch_size,max_length,features))
+x = inputX = inputs = tf.placeholder(tf.float32, shape=(batch_size, features, max_input_length))
+# inputs = tf.transpose(inputs, [0, 2, 1]) #  inputs must be a `Tensor` of shape: `[batch_size, max_time, ...]`
+inputs = tf.transpose(inputs, [2, 0, 1])  # [max_time, batch_size, features] to split:
+# Split data because rnn cell needs a list of inputs for the RNN inner loop
+inputs = tf.split(0, max_input_length, inputs)  # n_steps * (batch_size, features)
 
-####Define graph
-print('Defining graph')
-print('This takes forever + some')
-print('Impossible to debug')
-print('It is slower than any other tensorflow graph, why?')
+num_hidden = 100  # features
+cell = tf.nn.rnn_cell.LSTMCell(num_hidden, state_is_tuple=True)
+# cell = tf.nn.rnn_cell.EmbeddingWrapper(num_hidden, state_is_tuple=True)
 
-graph = tf.Graph()
-with graph.as_default():
-	####NOTE: try variable-steps inputs and dynamic bidirectional rnn, when it's implemented in tensorflow
+# in many cases it may be more efficient to not use this wrapper,
+#   but instead concatenate the whole sequence of your outputs in time,
+#   do the projection on this batch-concatenated sequence, then split it
+#   if needed or directly feed into a softmax.
+# cell = tf.nn.rnn_cell.OutputProjectionWrapper(cell,)
 
-	####Graph input
-	inputX = tf.placeholder(tf.float32, shape=(maxTimeSteps, Size, nFeatures))
-	# Prep input data to fit requirements of rnn.bidirectional_rnn
-	#  Reshape to 2-D tensor (nTimeSteps*Size, nfeatures)
-	inputXrs = tf.reshape(inputX, [-1, nFeatures])
-	#  Split to get a list of 'n_steps' tensors of shape (_size, n_hidden)
-	inputList = tf.split(0, maxTimeSteps, inputXrs)
-	targetIxs = tf.placeholder(tf.int64)
-	targetVals = tf.placeholder(tf.int32)
-	targetShape = tf.placeholder(tf.int64)
-	targetY = tf.SparseTensor(targetIxs, targetVals, targetShape)
-	seqLengths = tf.placeholder(tf.int32, shape=Size)
 
-	####Weights & biases
-	stddev = np.sqrt(2.0 / (2 * nHidden))
-	truncated_normal = tf.truncated_normal([2, nHidden], stddev=stddev)
-	weightsOutH1 = tf.Variable(truncated_normal)
-	biasesOutH1 = tf.Variable(tf.zeros([nHidden]))
-	weightsOutH2 = tf.Variable(truncated_normal)
-	biasesOutH2 = tf.Variable(tf.zeros([nHidden]))
-	half_normal = tf.truncated_normal([nHidden, nClasses], stddev=np.sqrt(2.0 / nHidden))
-	weightsClasses = tf.Variable(half_normal)
-	biasesClasses = tf.Variable(tf.zeros([nClasses]))
+cell = tf.nn.rnn_cell.MultiRNNCell(num_hidden, state_is_tuple=True)
+# rnn=tf.nn.rnn(cell,inputs)
+# rnn=tf.nn.dynamic_rnn(cell,inputs)
+# manual:
 
-	####Network
-	forwardH1 = rnn_cell.LSTMCell(nHidden, use_peepholes=True, state_is_tuple=True)
-	backwardH1 = rnn_cell.LSTMCell(nHidden, use_peepholes=True, state_is_tuple=True)
-	print("building bidirectional_rnn ... SLOW!!!")
-	fbH1, _, _ = bidirectional_rnn(forwardH1, backwardH1, inputList, dtype=tf.float32, scope='BDLSTM_H1')
-	print("done building rnn")
-	print("building fbH1rs ")
-	fbH1rs = [tf.reshape(t, [Size, 2, nHidden]) for t in fbH1]
-	print("building outH1 ")
-	outH1 = [tf.reduce_sum(tf.mul(t, weightsOutH1), reduction_indices=1) + biasesOutH1 for t in fbH1rs]
-	print("building logits ")
-	logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in outH1]
-	print("len(outH1) %d"% len(outH1))
-	####Optimizing
-	print("building loss")
-	logits3d = tf.pack(logits)
-	loss = tf.reduce_mean(ctc.ctc_loss(logits3d, targetY, seqLengths))
-	optimizer = tf.train.MomentumOptimizer(learningRate, momentum).minimize(loss)
+state = cell.zero_state(batch_size, dtype=tf.float32)
+if "manual" == 0:
+	outputs = []
+	for input_ in inputs:
+		input_ = tf.reshape(input_, [batch_size, features])
+		output, state = cell(input_, state)
+		outputs.append(output)
+	y_ = output
+else:
+	# inputs = tf.reshape(inputs, [-1, features])
+	inputs = [tf.reshape(input_, [batch_size, features]) for input_ in inputs]
+	outputs, states = tf.nn.rnn(cell, inputs, initial_state=state)
+# only last output as target for now
+# y_=outputs[-1]
 
-	####Evaluating
-	print("building Evaluation")
-	logitsMaxTest = tf.slice(tf.argmax(logits3d, 2), [0, 0], [seqLengths[0], 1])
-	predictions = tf.to_int32(ctc.ctc_beam_search_decoder(logits3d, seqLengths)[0][0])
-	reduced_sum = tf.reduce_sum(tf.edit_distance(predictions, targetY, normalize=False))
-	errorRate = reduced_sum / tf.to_float(tf.size(targetY.values))
+# optimize
+target_shape = (batch_size, max_word_length, classes)
+y = target = tf.placeholder(tf.float32, shape=target_shape)  # -> seq2seq!
 
-	check_op = tf.add_check_numerics_ops()
-print("done building graph")
+# dense
+logits = []
+costs = []
+i = 0
+accuracy = 0
+# for output in outputs:
+for i in range(0, max_word_length):
+	output = outputs[-i - 1]
+	uniform = tf.random_uniform([num_hidden, classes], minval=-1. / width, maxval=1. / width)
+	weights = tf.Variable(uniform, name="weights_%d" % i)
+	uniform_bias = tf.random_uniform([classes], minval=-1. / width, maxval=1. / width)
+	bias = tf.Variable(uniform_bias, name="bias_dense_%d" % i)
+	y_ = outputY = tf.matmul(output, weights, name="dense_%d" % i) + bias
 
-####Run session
-with tf.Session(graph=graph) as session:
-	try: merged = tf.summary.merge_all()
-	except: merged = tf.merge_all_summaries()
-	try:writer = tf.summary.FileWriter("/tmp/basic_new", session.graph)
-	except: writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
-	try:saver = tf.train.Saver()  # defaults to saving all variables
-	except:
-		print("tf.train.Saver() broken in tensorflow 0.12")
-		saver = tf.train.Saver(tf.all_variables())# WTF stupid API breaking
-	ckpt = tf.train.get_checkpoint_state('./checkpoints')
+	cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_, y[:, i, :]), name="cost")  # prediction, target
+	costs.append(cost)
+	logits.append(y_)
 
-	start = 0
-	if ckpt and ckpt.model_checkpoint_path:
-		p = re.compile('\./checkpoints/model\.ckpt-([0-9]+)')
-		m = p.match(ckpt.model_checkpoint_path)
-		try:start = int(m.group(1))
-		except:pass
-	if saver and start > 0:
-		# Restore variables from disk.
-		saver.restore(session, "./checkpoints/model.ckpt-%d" % start)
-		print("Model %d restored." % start)
-	else:
-		print('Initializing')
-		try: session.run(tf.global_variables_initializer())
-		except:session.run(tf.initialize_all_variables())
-	for epoch in range(nEpochs):
-		print('Epoch', epoch + 1, '...')
-		errors = np.zeros(len(edData))
-		RandIxs = np.random.permutation(len(edData))  # randomize  order
-		for Nr, OrigI in enumerate(RandIxs):
-			Inputs, TargetSparse, SeqLengths = edData[OrigI]
-			indices, values, shape = TargetSparse
-			feedDict = {inputX: Inputs, targetIxs: indices, targetVals: values, targetShape: shape, seqLengths: SeqLengths}
-			_, l, er, lmt, ok = session.run([optimizer, loss, errorRate, logitsMaxTest, check_op], feed_dict=feedDict)
-			print(np.unique(lmt))
-			# print unique argmax values of first sample in ; should be blank for a while, then spit out target values
-			if (Nr % 1) == 0:
-				print('Mini', Nr, '/', OrigI, 'loss:', l)
-				print('Mini', Nr, '/', OrigI, 'error rate:', er)
-			errors[Nr] = er * len(SeqLengths)
-		epochErrorRate = errors.sum() / totalN
-		print('Epoch', epoch + 1, 'error rate:', epochErrorRate)
-		if saver:saver.save(session, 'checkpoints/model.ckpt', global_step=epoch + 1)
-	print('Learning finished')
+	correct_pred = tf.equal(tf.argmax(outputY, 1), tf.argmax(y[:, i], 1))
+	accuraci = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+	accuracy += accuraci
 
+# costs=tf.reduce_sum(costs)*10
+# y_ = outputY = tf.pack(logits)
+
+# targetIxs = tf.placeholder(tf.int64, shape=(batch_size, None),name="indices")
+# targetVals = tf.placeholder(tf.int32,name="values")
+# targetShape = tf.placeholder(tf.int64,name="targetShape")
+# targetY = tf.SparseTensor(targetIxs, targetVals, targetShape)
+targetY = tf.SparseTensor()
+
+####Optimizing
+logits = y_
+logits3d = tf.pack(logits)
+seqLengths = [20] * batch_size
+cost = tf.reduce_mean(ctc.ctc_loss(logits3d, targetY, seqLengths))
+# CTCLoss op expects the reserved blank label to be the largest value! REALLY?
+
+# if 1D:
+tf.summary.scalar('cost', cost)
+tf.summary.scalar('costs', costs)
+optimizer = tf.train.AdamOptimizer(learning_rate).minimize(costs)
+# prediction = y_
+
+# Evaluate model
+# accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+# tf.scalar_summary('accuracy', accuracy)
+# predictions = tf.to_int32(ctc.ctc_beam_search_decoder(logits3d, seqLengths)[0][0])
+# accuracy = tf.reduce_mean(tf.reduce_mean(logits))
+# reduced_sum = tf.reduce_sum(tf.edit_distance(predictions, targetY, normalize=False))
+# errorRate = reduced_sum / tf.to_float(tf.size(targetY.values))
+
+steps = 9999999
+session = tf.Session()
+try:
+	saver = tf.train.Saver(tf.global_variables())
+except:
+	saver = tf.train.Saver(tf.all_variables())
+snapshot = "lstm_mfcc"
+checkpoint = tf.train.latest_checkpoint(checkpoint_dir="checkpoints")
+if checkpoint:
+	print("LOADING checkpoint " + checkpoint + "")
+	try: saver.restore(session, checkpoint)
+	except: print("incompatible checkpoint")
+try: session.run([tf.global_variables_initializer()])
+except: session.run([tf.initialize_all_variables()])  # tf <12
+
+# train
+step = 0  # show first
+try: summaries = tf.summary.merge_all()
+except: summaries = tf.merge_all_summaries()  # tf<12
+try: summary_writer = tf.summary.FileWriter("logs", session.graph)  #
+except: summary_writer = tf.train.SummaryWriter("logs", session.graph)  # tf<12
+while step < steps:
+	batch_xs, batch_ys = next(batch)
+
+	# tf.train.shuffle_batch_join(example_list, batch_size, capacity=min_queue_size + batch_size * 16, min_queue_size)
+	# Fit training using batch data
+	feed_dict = {x: batch_xs, y: batch_ys}
+	# feed_dict = {inputX: batch_xs, targetIxs: batch_ys.indices, targetVals: batch_ys.values,targetShape: 20}
+	# , seqLengths: batchSeqLengths
+	loss, _ = session.run([costs, optimizer], feed_dict=feed_dict)
+	if step % display_step == 0:
+		seconds = int(time.time()) - start
+		# Calculate batch accuracy, loss
+		feed = {x: batch_xs, y: batch_ys}  # , keep_prob: 1., train_phase: False}
+		acc, summary = session.run([accuracy, summaries], feed_dict=feed)
+		# summary_writer.add_summary(summary, step) # only test summaries for smoother curve
+		print("\rStep {:d} Loss={:.4f} Fit={:.1f}% Time={:d}s".format(step, loss, acc, seconds), end=' ')
+		if str(loss) == "nan":
+			print("\nLoss gradiant explosion, quitting!!!")  # restore!
+			quit(0)
+	# if step % test_step == 0: test(step)
+	if step % save_step == 0 and step > 0:
+		print("SAVING snapshot %s" % snapshot)
+		saver.save(session, "checkpoints/" + snapshot + ".ckpt", step)
+	step = step + 1
