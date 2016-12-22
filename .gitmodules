@@ -4,3 +4,4 @@
 [submodule "layer"]
 	path = layer
 	url = git@github.com:pannous/layer.git
+	branch = master
