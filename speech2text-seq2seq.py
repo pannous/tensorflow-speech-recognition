@@ -3,7 +3,11 @@
 
 print("""
 Update:
-# tf.nn.seq2seq doesn't work as hoped: It needs a 1D Tensor (chars) as input, not 2D spectrogram/mfcc/... unless we feed it with very long 1D wave data, but that is probably not what seq2seq was intended to for. Fear not: 1D dilated convolution and LSTMs together with CTC are just fine.
+tf.nn.seq2seq doesn't work as hoped:
+	It needs a 1D Tensor (chars) as input, not 2D spectrogram/mfcc/...
+ unless we feed it with very long 1D wave data,
+ but that is probably not what seq2seq was intended to for.
+ Fear not: 1D dilated convolution and LSTMs together with CTC are just fine.
 """)
 
 exit(0)
