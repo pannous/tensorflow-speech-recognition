@@ -1,3 +1,6 @@
 [submodule "tensorpeers"]
 	path = tensorpeers
 	url = git@github.com:pannous/tensorpeers.git
+[submodule "layer"]
+	path = layer
+	url = git@github.com:pannous/layer.git
