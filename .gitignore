@@ -13,3 +13,9 @@ extension_functions.py
 0_Kathy_160.wav
 lstm_mfcc_ctc_to_words.py
 extra/contributors.txt
+number
+sample_data
+spoken_numbers_64x64/
+spoken_numbers_pcm
+spoken_words/
+warp-ctc/
