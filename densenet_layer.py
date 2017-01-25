@@ -65,7 +65,7 @@ X,Y=next(batch)
 
 # CHOOSE MODEL ARCHITECTURE HERE:
 # net = layer.net(simple_dense, data=batch, input_width=width, output_width=classes, learning_rate=0.01)
-net = layer.net(simple_dense, data=batch, input_shape=(width,height), output_width=classes, learning_rate=0.01)
+net = layer.net(simple_dense, input_shape=(width,height), output_width=classes, learning_rate=0.01)
 # net=layer.net(model=alex,input_shape=(width, height),output_width=10, learning_rate=learning_rate)
 # net=layer.net(model=denseConv, input_shape=(width, height),output_width=10, learning_rate=learning_rate)
 
