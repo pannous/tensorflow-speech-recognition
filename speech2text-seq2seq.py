@@ -8,7 +8,10 @@ tf.nn.seq2seq doesn't work as hoped:
  unless we feed it with very long 1D wave data,
  but that is probably not what seq2seq was intended to for.
  Fear not: 1D dilated convolution and LSTMs together with CTC are just fine.
+
+ New dynamic seq2seq was recently added to the master and will probably be out with 1.0.0 release.I
 """)
+
 
 exit(0)
 

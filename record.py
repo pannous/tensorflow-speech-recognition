@@ -24,6 +24,7 @@ i = 0
 width=256
 height=256
 
+# Number of bytes to be captured from audio stream
 # CHUNK = 512
 # CHUNK = 1024
 # CHUNK = 1024
@@ -31,42 +32,44 @@ height=256
 CHUNK = 4096
 # CHUNK = 9192
 
+# number of bytes used per FFT fourier slice
 # length=512
 length = 1024
 # length=2048
 # length = 4096
 
+#  forward step in sliding window [ CHUNK    [[length]-> ]step      CHUNK   ]
 # step=32
 # step=64
 # step = 128
 step=256
 # step=512
+# step<length : some overlap
 
-# width=512
-image=numpy.array(bytearray(os.urandom(width*width))) # 512,512)
+image=numpy.array(bytearray(os.urandom(width*width)))
 image=image.reshape(width,width)
 
 def get_audio_input_stream():
-	INDEX = 0  # 1
-	# FORMAT = pyaudio.paInt8
-	FORMAT = pyaudio.paInt16
-	# FORMAT = pyaudio.paInt32
-	# FORMAT = pyaudio.paFloat32
-	CHANNELS = 1
-	# RATE = 22500
-	RATE = 48000 #* 2 = 96000Hz max on mac
-	INPUT_BLOCK_TIME = 0.05
-	# INPUT_BLOCK_TIME = 0.1
-	INPUT_FRAMES_PER_BLOCK = int(RATE * INPUT_BLOCK_TIME)
+  INDEX = 0  # 1
+  # FORMAT = pyaudio.paInt8
+  FORMAT = pyaudio.paInt16
+  # FORMAT = pyaudio.paInt32
+  # FORMAT = pyaudio.paFloat32
+  CHANNELS = 1
+  # RATE = 22500
+  RATE = 48000 #* 2 = 96000Hz max on mac
+  INPUT_BLOCK_TIME = 0.05
+  # INPUT_BLOCK_TIME = 0.1
+  INPUT_FRAMES_PER_BLOCK = int(RATE * INPUT_BLOCK_TIME)
 
-	stream = pyaudio.PyAudio().open(
-		format=FORMAT,
-		channels=CHANNELS,
-		rate=RATE,
-		input=True,
-		frames_per_buffer=CHUNK,
-		input_device_index=INDEX)
-	return stream
+  stream = pyaudio.PyAudio().open(
+    format=FORMAT,
+    channels=CHANNELS,
+    rate=RATE,
+    input=True,
+    frames_per_buffer=CHUNK,
+    input_device_index=INDEX)
+  return stream
 
 def record():
   global i
@@ -81,11 +84,11 @@ def record():
   offset = 0
   while True:
     try:
-	    dataraw = stream.read(CHUNK)
+      dataraw = stream.read(CHUNK)
     except IOError as e:
-	    print(e) # [Errno -9981] Input overflowed  WHY?
-	    stream=get_audio_input_stream()
-	    pass
+      print(e) # [Errno -9981] Input overflowed  WHY?
+      stream=get_audio_input_stream()
+      continue
     data0 = numpy.fromstring(dataraw, dtype='int16')
     # data0 = numpy.fromstring(dataraw, dtype='int8')
     if(i<20 and numpy.sum(np.abs(data0))<1000*width):
