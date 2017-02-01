@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 #!/usr/bin/python
 import tensorflow as tf
+
 import layer
 import speech_data
 from speech_data import Source,Target
-
 
 learning_rate = 0.001
 training_iters = 300000
@@ -38,7 +38,7 @@ def denseConv(net):
 	# type: (layer.net) -> None
 	print("Building dense-net")
 	net.reshape(shape=[-1, 64, 64, 1])  # Reshape input picture
-	net.buildDenseConv(nBlocks=1, magic_factor = 16) # increase nBlocks for real data
+	net.buildDenseConv(nBlocks=1)  # increase nBlocks for real data
 	net.classifier() # auto classes from labels
 
 
@@ -61,7 +61,6 @@ else:
 	batch=word_batch=speech_data.spectro_batch_generator(10, width, source_data=Source.WORD_SPECTROS, target=Target.first_letter)
 	raise Exception("TODO")
 
-X,Y=next(batch)
 
 # CHOOSE MODEL ARCHITECTURE HERE:
 # net = layer.net(simple_dense, data=batch, input_width=width, output_width=classes, learning_rate=0.01)
