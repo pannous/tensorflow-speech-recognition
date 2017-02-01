@@ -28,13 +28,15 @@ Later:
 ![Sample spectrogram or record.py](images/spectrogram.demo.png)
 
 ## Partners + collaborators wanted
-We are in the process of tackling this project in seriousness. If you want to join the party just start with a small pull request.
+We are in the process of tackling this project in seriousness. If you want to join the party just drop us an email at [info@pannous.com](mailto:info@pannous.com?subject=speech_recognition).
 <!-- ╮⚆ᴥ⚆╭ -->
 
-Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build models that are state of the art. Unfortunately they didn't open source the software.
+Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build speech recognizers that are state of the art. Unfortunately they didn't open source the software.
 <!-- ᖗ*﹏*ᖘ -->
 
 ###Fun tasks for newcomers
+* Watch video : https://www.youtube.com/watch?v=u9FPqkuoEJ8
+* Understand the corresponding code: lstm-tflearn.py 
 * Data Augmentation :  create on-the-fly modulation of the data: increase the speech frequency, add background noise, alter the pitch etc,...
 <!-- ᕮ◔‿◔ᕭ -->
 
@@ -47,7 +49,7 @@ Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that
 
 Even though this project is far from finished we hope it gives you some starting points.
 
-Looking for a tensorflow consultant / deep learning contractor? Reach out to info@pannous.com
+Looking for a tensorflow collaboration / consultant / deep learning contractor? Reach out to [info@pannous.com](mailto:info@pannous.com?subject=contractor)
 <!-- 
 ### Warning / Attention
 Google keeps [deliberately breaking the tensorflow API](https://github.com/tensorflow/tensorflow/issues/4283) so you always need the latest tensorflow release if you want current examples to run (and can't run old tensorflow stuff simultaneously.) -->
