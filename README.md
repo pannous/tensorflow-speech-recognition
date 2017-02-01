@@ -36,7 +36,7 @@ Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that
 
 ###Fun tasks for newcomers
 * Watch video : https://www.youtube.com/watch?v=u9FPqkuoEJ8
-* Understand the corresponding code: lstm-tflearn.py 
+* Understand and correct the corresponding code: [lstm-tflearn.py](/lstm-tflearn.py) 
 * Data Augmentation :  create on-the-fly modulation of the data: increase the speech frequency, add background noise, alter the pitch etc,...
 <!-- ᕮ◔‿◔ᕭ -->
 
