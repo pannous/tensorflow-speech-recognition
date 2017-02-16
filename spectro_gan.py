@@ -71,7 +71,7 @@ batch=speech_data.spectro_batch(batch_size)
 draw=0
 
 # Train
-tf.initialize_all_variables().run()
+tf.global_variables_initializer().run()
 steps=30000
 e=0
 for i in range(steps):

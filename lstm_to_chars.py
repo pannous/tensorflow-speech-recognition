@@ -77,7 +77,7 @@ with graph.as_default():
 	#  Reshape to 2-D tensor (nTimeSteps*Size, nfeatures)
 	inputXrs = tf.reshape(inputX, [-1, nFeatures])
 	#  Split to get a list of 'n_steps' tensors of shape (_size, n_hidden)
-	inputList = tf.split(0, maxTimeSteps, inputXrs)
+	inputList = tf.split(axis=0, num_or_size_splits=maxTimeSteps, value=inputXrs)
 	targetIxs = tf.placeholder(tf.int64)
 	targetVals = tf.placeholder(tf.int32)
 	targetShape = tf.placeholder(tf.int64)
@@ -104,13 +104,13 @@ with graph.as_default():
 	print("building fbH1rs ")
 	fbH1rs = [tf.reshape(t, [Size, 2, nHidden]) for t in fbH1]
 	print("building outH1 ")
-	outH1 = [tf.reduce_sum(tf.mul(t, weightsOutH1), reduction_indices=1) + biasesOutH1 for t in fbH1rs]
+	outH1 = [tf.reduce_sum(tf.multiply(t, weightsOutH1), axis=1) + biasesOutH1 for t in fbH1rs]
 	print("building logits ")
 	logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in outH1]
 	print("len(outH1) %d"% len(outH1))
 	####Optimizing
 	print("building loss")
-	logits3d = tf.pack(logits)
+	logits3d = tf.stack(logits)
 	loss = tf.reduce_mean(ctc.ctc_loss(logits3d, targetY, seqLengths))
 	out = tf.identity(loss, 'ctc_loss_mean')
 	optimizer = tf.train.MomentumOptimizer(learningRate, momentum).minimize(loss)
@@ -128,13 +128,13 @@ print("done building graph")
 ####Run session
 with tf.Session(graph=graph) as session:
 	try: merged = tf.summary.merge_all()
-	except: merged = tf.merge_all_summaries()
+	except: merged = tf.summary.merge_all()
 	try:writer = tf.summary.FileWriter("/tmp/basic_new", session.graph)
-	except: writer = tf.train.SummaryWriter("/tmp/basic_new", session.graph)
+	except: writer = tf.summary.FileWriter("/tmp/basic_new", session.graph)
 	try:saver = tf.train.Saver()  # defaults to saving all variables
 	except:
 		print("tf.train.Saver() broken in tensorflow 0.12")
-		saver = tf.train.Saver(tf.all_variables())# WTF stupid API breaking
+		saver = tf.train.Saver(tf.global_variables())# WTF stupid API breaking
 	ckpt = tf.train.get_checkpoint_state('./checkpoints')
 
 	start = 0
@@ -150,7 +150,7 @@ with tf.Session(graph=graph) as session:
 	else:
 		print('Initializing')
 		try: session.run(tf.global_variables_initializer())
-		except:session.run(tf.initialize_all_variables())
+		except:session.run(tf.global_variables_initializer())
 	for epoch in range(nEpochs):
 		print('Epoch', epoch + 1, '...')
 		errors = np.zeros(len(edData))
