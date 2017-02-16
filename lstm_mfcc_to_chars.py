@@ -34,7 +34,7 @@ x=inputs=tf.placeholder(tf.float32, shape=(batch_size,features,max_length))
 # inputs = tf.transpose(inputs, [0, 2, 1]) #  inputs must be a `Tensor` of shape: `[batch_size, max_time, ...]`
 inputs = tf.transpose(inputs, [2, 0, 1]) # [max_time, batch_size, features] to split:
 # Split data because rnn cell needs a list of inputs for the RNN inner loop
-inputs = tf.split(0, max_length, inputs)  # n_steps * (batch_size, features)
+inputs = tf.split(axis=0, num_or_size_splits=max_length, value=inputs)  # n_steps * (batch_size, features)
 
 num_hidden = 100 #features
 cell = tf.nn.rnn_cell.LSTMCell(num_hidden, state_is_tuple=True)
@@ -65,18 +65,18 @@ y_ = tf.matmul(y_, weights, name='dense' ) + bias
 # optimize
 # if use_word: y=target=tf.placeholder(tf.float32, shape=(batch_size,(None,32))) # -> seq2seq!
 y=target=tf.placeholder(tf.float32, shape=(batch_size,classes))
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_,y),name="cost")  # prediction, target
-tf.scalar_summary('cost', cost)
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_,labels=y),name="cost")  # prediction, target
+tf.summary.scalar('cost', cost)
 optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 prediction = y_
 # Evaluate model
 correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(target, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-tf.scalar_summary('accuracy', accuracy)
+tf.summary.scalar('accuracy', accuracy)
 
 steps = 9999999
 session=tf.Session()
-saver = tf.train.Saver(tf.all_variables())
+saver = tf.train.Saver(tf.global_variables())
 snapshot = "lstm_mfcc"
 checkpoint = tf.train.latest_checkpoint(checkpoint_dir="checkpoints")
 if checkpoint:
@@ -84,13 +84,13 @@ if checkpoint:
 	try:saver.restore(session, checkpoint)
 	except: print("incompatible checkpoint")
 try: session.run([tf.global_variables_initializer()])
-except: session.run([tf.initialize_all_variables()])
+except: session.run([tf.global_variables_initializer()])
 
 
 #train
 step = 0  # show first
-summaries = tf.merge_all_summaries()
-summary_writer = tf.train.SummaryWriter("logs", session.graph)  #
+summaries = tf.summary.merge_all()
+summary_writer = tf.summary.FileWriter("logs", session.graph)  #
 while step < steps:
 	batch_xs, batch_ys = next(batch)
 	# tf.train.shuffle_batch_join(example_list, batch_size, capacity=min_queue_size + batch_size * 16, min_queue_size)

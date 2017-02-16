@@ -92,7 +92,7 @@ logit = (skip
 # CTC loss
 loss = logit.sg_ctc(target=y, seq_len=seq_len)
 tf.train.AdamOptimizer(learning_rate).minimize(loss)
-saver = tf.train.Saver(tf.all_variables())
+saver = tf.train.Saver(tf.global_variables())
 
 # train
 tf.sg_train(log_interval=30, lr=0.0001, loss=loss, ep_size=1000, max_ep=200, early_stop=False)

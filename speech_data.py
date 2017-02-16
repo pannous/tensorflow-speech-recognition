@@ -401,8 +401,8 @@ def many_hot_to_word(word):
 def dense_to_one_hot(batch, batch_size, num_labels):
 	sparse_labels = tf.reshape(batch, [batch_size, 1])
 	indices = tf.reshape(tf.range(0, batch_size, 1), [batch_size, 1])
-	concatenated = tf.concat(1, [indices, sparse_labels])
-	concat = tf.concat(0, [[batch_size], [num_labels]])
+	concatenated = tf.concat(axis=1, values=[indices, sparse_labels])
+	concat = tf.concat(axis=0, values=[[batch_size], [num_labels]])
 	output_shape = tf.reshape(concat, [2])
 	sparse_to_dense = tf.sparse_to_dense(concatenated, output_shape, 1.0, 0.0)
 	return tf.reshape(sparse_to_dense, [batch_size, num_labels])
@@ -411,8 +411,8 @@ def dense_to_one_hot(batch, batch_size, num_labels):
 def dense_to_one_hot(batch, batch_size, num_labels):
 	sparse_labels = tf.reshape(batch, [batch_size, 1])
 	indices = tf.reshape(tf.range(0, batch_size, 1), [batch_size, 1])
-	concatenated = tf.concat(1, [indices, sparse_labels])
-	concat = tf.concat(0, [[batch_size], [num_labels]])
+	concatenated = tf.concat(axis=1, values=[indices, sparse_labels])
+	concat = tf.concat(axis=0, values=[[batch_size], [num_labels]])
 	output_shape = tf.reshape(concat, [2])
 	sparse_to_dense = tf.sparse_to_dense(concatenated, output_shape, 1.0, 0.0)
 	return tf.reshape(sparse_to_dense, [batch_size, num_labels])

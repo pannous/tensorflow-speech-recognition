@@ -37,7 +37,7 @@ x= inputX=inputs=tf.placeholder(tf.float32, shape=(batch_size, features, max_inp
 # inputs = tf.transpose(inputs, [0, 2, 1]) #  inputs must be a `Tensor` of shape: `[batch_size, max_time, ...]`
 inputs = tf.transpose(inputs, [2, 0, 1]) # [max_time, batch_size, features] to split:
 # Split data because rnn cell needs a list of inputs for the RNN inner loop
-inputs = tf.split(0, max_input_length, inputs)  # n_steps * (batch_size, features)
+inputs = tf.split(axis=0, num_or_size_splits=max_input_length, value=inputs)  # n_steps * (batch_size, features)
 
 num_hidden = 100 #features
 cell = tf.nn.rnn_cell.LSTMCell(num_hidden, state_is_tuple=True)
@@ -75,7 +75,7 @@ for i in range(0, max_word_length):
 	bias = tf.Variable(tf.random_uniform([classes], minval=-1. / width, maxval=1. / width), name="bias_dense_%d"%i)
 	y_ = outputY = tf.matmul(output, weights, name="dense_%d" % i) + bias
 
-	cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_, y[:,i,:]), name="cost")  # prediction, target
+	cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_, labels=y[:,i,:]), name="cost")  # prediction, target
 	costs.append(cost)
 	logits.append(y_)
 
@@ -94,7 +94,7 @@ targetY = tf.SparseTensor()
 
 ####Optimizing
 logits=y_
-logits3d = tf.pack(logits)
+logits3d = tf.stack(logits)
 seqLengths=[20]*batch_size
 cost = tf.reduce_mean(ctc.ctc_loss(logits3d, targetY, seqLengths))
 # CTCLoss op expects the reserved blank label to be the largest value! REALLY?
@@ -116,7 +116,7 @@ optimizer = tf.train.AdamOptimizer(learning_rate).minimize(costs)
 steps = 9999999
 session=tf.Session()
 try:saver = tf.train.Saver(tf.global_variables())
-except:saver = tf.train.Saver(tf.all_variables())
+except:saver = tf.train.Saver(tf.global_variables())
 snapshot = "lstm_mfcc"
 checkpoint = tf.train.latest_checkpoint(checkpoint_dir="checkpoints")
 if checkpoint:
@@ -124,15 +124,15 @@ if checkpoint:
 	try:saver.restore(session, checkpoint)
 	except: print("incompatible checkpoint")
 try: session.run([tf.global_variables_initializer()])
-except: session.run([tf.initialize_all_variables()])# tf <12
+except: session.run([tf.global_variables_initializer()])# tf <12
 
 
 #train
 step = 0  # show first
 try:summaries = tf.summary.merge_all()
-except:summaries = tf.merge_all_summaries() # tf<12
+except:summaries = tf.summary.merge_all() # tf<12
 try:summary_writer = tf.summary.FileWriter("logs", session.graph)  #
-except:summary_writer = tf.train.SummaryWriter("logs", session.graph)  # tf<12
+except:summary_writer = tf.summary.FileWriter("logs", session.graph)  # tf<12
 while step < steps:
 	batch_xs, batch_ys = next(batch)
 

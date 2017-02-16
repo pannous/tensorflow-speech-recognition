@@ -94,7 +94,7 @@ def eval(feed):
 
 
 def train_spectrogram_encoder():
-  tf.initialize_all_variables().run()
+  tf.global_variables_initializer().run()
   print("Pretrain")
   for i in range(6000-1):
     batch_xs, batch_ys = speech.train.next_batch(100)

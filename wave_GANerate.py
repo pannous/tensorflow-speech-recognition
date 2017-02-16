@@ -79,7 +79,7 @@ def play_pcm(data):
 
 
 # Train
-tf.initialize_all_variables().run()
+tf.global_variables_initializer().run()
 steps=3000#000
 batch=speech_data.wave_batch_generator(target=speech_data.Target.digits)
 negative=[0]*batch_size # input was fake
