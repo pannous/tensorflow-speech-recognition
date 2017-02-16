@@ -1,4 +1,3 @@
-libtorrent
 #required
 tensorflow
 tflearn
@@ -10,4 +9,6 @@ pyaudio
 wave
 python_speech_features
 matplotlib
+libtorrent
+tensorlayer
 # cv,cv2 #  deprecated, we use matplotlib.pyplot now
