@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 
 import librosa #mfcc 1.st lib
