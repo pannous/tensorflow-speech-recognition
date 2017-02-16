@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#!/usr/bin/env python
 '''
 Example of a single-layer bidirectional long short-term memory network trained with
 connectionist temporal classification to predict character sequences from nFeatures x nFrames

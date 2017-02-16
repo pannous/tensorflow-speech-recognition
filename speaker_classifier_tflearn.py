@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #!/usr/local/bin/python
 #!/usr/bin/env PYTHONIOENCODING="utf-8" python
 import os

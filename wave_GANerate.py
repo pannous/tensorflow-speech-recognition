@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #!/usr/bin/python 
 # PYTHONUNBUFFERED=1
 """A simple GAN network and classifer.

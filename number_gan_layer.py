@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #!/usr/bin/python
 import speech_data
 import layer

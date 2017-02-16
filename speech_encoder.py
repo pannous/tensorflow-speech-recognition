@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """A simple speech classifer AND autoencoder
 
 1st step : classify+encode the spectogram of 10 spoken digits into one-hot-vector + 'flavor'-vector of size 10

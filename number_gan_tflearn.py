@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import tflearn
 import pyaudio
 import speech_data
