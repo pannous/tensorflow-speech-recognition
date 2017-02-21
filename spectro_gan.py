@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 #!/usr/local/bin/python
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
-import speech_data
 
-# 
+import speech_data
 
 sess = tf.InteractiveSession()
 
@@ -13,7 +12,8 @@ batch_size=100
 width=height=64
 dim=width*height
 # # Create the classifier model
-x = tf.placeholder("float", [batch_size, dim],name='image_batch') # None~batch_size
+x2 = tf.placeholder("float", [batch_size, width, height], name='image_batch')  # None~batch_size
+x = tf.reshape(x2, [batch_size, dim])  # flatten
 W = tf.Variable(tf.zeros([dim,10]))
 b = tf.Variable(tf.zeros([10]))
 y = tf.nn.softmax(tf.matmul(x,W) + b)
@@ -61,7 +61,7 @@ def check_accuracy():
   correct_prediction = tf.equal(prediction, tf.argmax(y_,1))
   accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
   batch_xs, batch_ys = next(batch)
-  feed_dict={x: batch_xs, y_: batch_ys}
+  feed_dict = {x2: batch_xs, y_: batch_ys}
   best,p,a,verdict1= sess.run([prediction,probability,accuracy,verdict],feed_dict)
   # print(best,a,list(map(lambda x:round(x,3),p[0])))
   print("overal accuracy ",a)
@@ -77,9 +77,12 @@ steps=30000
 e=0
 for i in range(steps):
   batch_xs, batch_ys = next(batch)
-  train_step.run({x: batch_xs, y_: batch_ys}) # classical classifier
-  _, _, verdict1 =sess.run([discriminate,gan_step,verdict],{x: batch_xs,y_: batch_ys,verdict_:positive}) # true examples
-  sampled, _ , loss,verdict0 =sess.run([generate,gan_step,generator_entropy,verdict], {x: batch_xs, y_: batch_ys, verdict_: negative})# generated samples
+  # use x2 for matrix, x for flattened data
+  train_step.run({x2: batch_xs, y_: batch_ys})  # classical classifier
+  _, _, verdict1 = sess.run([discriminate, gan_step, verdict],
+                            {x2: batch_xs, y_: batch_ys, verdict_: positive})  # true examples
+  sampled, _, loss, verdict0 = sess.run([generate, gan_step, generator_entropy, verdict],
+                                        {x2: batch_xs, y_: batch_ys, verdict_: negative})  # generated samples
   e+=loss
   if(i%10==0):
     print("loss ",e)
