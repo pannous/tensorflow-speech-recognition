@@ -2,6 +2,8 @@
 tensorflow
 tflearn
 numpy
+layer
+# or git clone --recursive for layer submodule
 
 #optional:
 scikit-image
