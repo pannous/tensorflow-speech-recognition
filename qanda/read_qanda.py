@@ -6,6 +6,7 @@ import wave
 import numpy
 import pyaudio
 from dateutil import parser
+
 audio = pyaudio.PyAudio()
 
 waveFile = wave.open('qanda_2012_ep99_climate.wav', 'r')
@@ -25,11 +26,6 @@ out_stream = audio.open(format=pyaudio.paInt16, channels=waveFile.getnchannels()
 out_stream.start_stream()
 
 def play(fro, to):
-	if fro>to or (to-fro)>3*1000:
-		print("segmented too long:")
-		print(fro)
-		print(to)
-		return
 	fro = fro* frameRate/1000
 	to = to * frameRate /1000
 	waveFile.setpos(fro)
@@ -50,10 +46,16 @@ lines = open(subtitles).readlines()
 i = 0
 while i<len(lines):
 	nr,offsets,word=lines[i:i+3]
+	i += 4
 	print(word)
 	fro, to = offsets.split("-->")
 	fro = milliseconds(fro)
 	to = milliseconds(to)
+	if fro > to or (to - fro) > 3 * 1000:
+		print("segment too long:")
+		print(word)
+		print(fro)
+		print(to)
+		continue
 	play(fro,to)
-	i += 4
 
