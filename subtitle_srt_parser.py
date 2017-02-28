@@ -29,7 +29,7 @@ def play(fro, to):
 	fro = fro* frameRate/1000
 	to = to * frameRate /1000
 	waveFile.setpos(fro)
-	dataraw = waveFile.readframes(2 * (to - fro)) # 2 ?? channels?
+	dataraw = waveFile.readframes(2 * (to - fro))  # 2 bytes per frame : 16bit little-endian mono @ 16khz
 	data0 = numpy.fromstring(dataraw, dtype='int16')
 	out_stream.write(data0)
 

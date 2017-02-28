@@ -31,7 +31,9 @@ Later:
 We are in the process of tackling this project in seriousness. If you want to join the party just drop us an email at [info@pannous.com](mailto:info@pannous.com?subject=speech_recognition).
 <!-- ╮⚆ᴥ⚆╭ -->
 
-Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build speech recognizers that are state of the art. Unfortunately they didn't open source the software.
+Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build speech recognizers that are state of the art. 
+Update: **Mozilla** is working on [DeepSpeech
+](https://github.com/mozilla/DeepSpeech) and just achieved [0% error rate](http://doyouunderstand.me) ... on the training set;) Free Speech is in good hands.
 <!-- ᖗ*﹏*ᖘ -->
 
 ###Fun tasks for newcomers

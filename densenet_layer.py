@@ -65,9 +65,9 @@ else:
 
 # CHOOSE MODEL ARCHITECTURE HERE:
 # net = layer.net(simple_dense, data=batch, input_width=width, output_width=classes, learning_rate=0.01)
-net = layer.net(simple_dense, input_shape=(width,height), output_width=classes, learning_rate=0.01)
+# net = layer.net(simple_dense, input_shape=(width,height), output_width=classes, learning_rate=0.01)
 # net=layer.net(model=alex,input_shape=(width, height),output_width=10, learning_rate=learning_rate)
-# net=layer.net(model=denseConv, input_shape=(width, height),output_width=10, learning_rate=learning_rate)
+net = layer.net(model=denseConv, input_shape=(width, height), output_width=10, learning_rate=learning_rate)
 
 net.train(data=batch,batch_size=10,steps=500,dropout=0.6,display_step=1,test_step=1) # debug
 # net.train(data=batch,batch_size=10,steps=5000,dropout=0.6,display_step=5,test_step=20) # test
