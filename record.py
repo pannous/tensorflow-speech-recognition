@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#!/usr/bin/env python
 import subprocess
 import skimage.io
 import traceback
@@ -72,16 +71,30 @@ def get_audio_input_stream():
     input_device_index=INDEX)
   return stream
 
+  
+
+def next_frame():
+  stream = get_audio_input_stream()
+  while True:
+    try:
+      dataraw = stream.read(CHUNK)
+    except IOError as e:
+      print(e) # [Errno -9981] Input overflowed  WHY?
+      stream = get_audio_input_stream() # reset
+      continue
+    data0 = numpy.fromstring(dataraw, dtype='int16')
+    yield data0
+
 def record():
   global i
   global image
   global winName
   FILENAME = 'recording.wav'
-  stream = get_audio_input_stream()
   # r = numpy.array()
   hamming_window = np.hamming(length) # minimize fourier frequency drain
   #hamming hanning bartlett 'blackman'
   r = numpy.empty(length)
+  stream = get_audio_input_stream()
   offset = 0
   while True:
     try:
