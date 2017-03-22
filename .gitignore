@@ -18,4 +18,5 @@ sample_data
 spoken_numbers_64x64/
 spoken_numbers_pcm
 spoken_words/
-warp-ctc/
+warp-ctc/notes.txt
+notes.txt
