@@ -36,13 +36,13 @@ Update: **Mozilla** is working on [DeepSpeech
 ](https://github.com/mozilla/DeepSpeech) and just achieved [0% error rate](http://doyouunderstand.me) ... on the training set;) Free Speech is in good hands.
 <!-- ᖗ*﹏*ᖘ -->
 
-###Fun tasks for newcomers
+### Fun tasks for newcomers
 * Watch video : https://www.youtube.com/watch?v=u9FPqkuoEJ8
 * Understand and correct the corresponding code: [lstm-tflearn.py](/lstm-tflearn.py) 
 * Data Augmentation :  create on-the-fly modulation of the data: increase the speech frequency, add background noise, alter the pitch etc,...
 <!-- ᕮ◔‿◔ᕭ -->
 
-###Extensions 
+### Extensions 
 **Extensions** to current tensorflow which are probably needed:
 * [WarpCTC on the GPU](https://github.com/baidu-research/warp-ctc/tree/master/tensorflow_binding) see [issue](https://github.com/tensorflow/tensorflow/issues/2146)
 * Incremental collaborative snapshots ('[P2P learning](https://github.com/pannous/tensorpeers)') !
