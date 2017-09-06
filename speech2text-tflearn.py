@@ -45,7 +45,7 @@ if os.path.isfile("tflearn.lstm.model"):
     print ("loading model tflearn.lstm.model")
     model.load("tflearn.lstm.model")
 while 1: #training_iters
-    model.fit(trainX, trainY, n_epoch=1, validation_set=(testX, testY), show_metric=True,
+    model.fit(trainX, trainY, n_epoch=100, validation_set=(testX, testY), show_metric=True,
           batch_size=batch_size)
     _y=model.predict(X)
 model.save("tflearn.lstm.model")
