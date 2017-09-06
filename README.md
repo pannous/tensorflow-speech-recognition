@@ -18,11 +18,10 @@ git clone https://github.com/pannous/tensorflow-speech-recognition
 cd tensorflow-speech-recognition
 git clone https://github.com/pannous/layer.git
 git clone https://github.com/pannous/tensorpeers.git
-
 ```
 
 ### pyaudio
-#### requirents portaudio from http://www.portaudio.com/
+#### requirements portaudio from http://www.portaudio.com/
 ```
 git clone  https://git.assembla.com/portaudio.git
 ./configure --prefix=/path/to/your/local
@@ -36,7 +35,6 @@ source ~/.bashrc
 #### install pyaudio
 ```
 pip install pyaudio
-
 ```
 
 ## Getting started
