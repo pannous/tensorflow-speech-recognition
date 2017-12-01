@@ -5,8 +5,8 @@ Replaces [caffe-speech-recognition](https://github.com/pannous/caffe-speech-reco
 
 
 ## Update **Mozilla** released [DeepSpeech](https://github.com/mozilla/DeepSpeech)
-They achieve good [error rates](http://doyouunderstand.me), go *there* if you are an end user.
-Free Speech is in good hands, for now *this* project is only maintained for educational purposes.
+They achieve good [error rates](http://doyouunderstand.me). Free Speech is in good hands, go *there* if you are an end user.
+For now *this* project is only maintained for educational purposes.
 
 
 ## Ultimate goal
