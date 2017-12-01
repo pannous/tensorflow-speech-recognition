@@ -4,8 +4,8 @@ Speech recognition using google's [tensorflow](https://github.com/tensorflow/ten
 Replaces [caffe-speech-recognition](https://github.com/pannous/caffe-speech-recognition), see there for some background.
 
 
-# Update: **Mozilla** released [DeepSpeech](https://github.com/mozilla/DeepSpeech)
-They achieve good [0% error rates](http://doyouunderstand.me), go *there* if you are an end user.
+## Update **Mozilla** released [DeepSpeech](https://github.com/mozilla/DeepSpeech)
+They achieve good [error rates](http://doyouunderstand.me), go *there* if you are an end user.
 Free Speech is in good hands, for now *this* project is only maintained for educational purposes.
 
 
