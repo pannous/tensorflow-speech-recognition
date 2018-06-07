@@ -98,11 +98,11 @@ def record():
   offset = 0
   while True:
     try:
-      dataraw = stream.read(CHUNK)
+	    dataraw = stream.read(CHUNK)
     except IOError as e:
-      print(e) # [Errno -9981] Input overflowed  WHY?
-      stream=get_audio_input_stream()
-      continue
+	    print(e) # [Errno -9981] Input overflowed  WHY?
+	    stream=get_audio_input_stream()
+	    pass
     data0 = numpy.fromstring(dataraw, dtype='int16')
     # data0 = numpy.fromstring(dataraw, dtype='int8')
     if(i<20 and numpy.sum(np.abs(data0))<1000*width):

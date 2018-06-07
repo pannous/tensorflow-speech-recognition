@@ -24,6 +24,9 @@ try:
 except:
 	pass # fuck 2to3
 
+speech_commands="sheila seven right one house down zero go yes wow six no three happy \
+bird stop marvin two five on off four dog up tree cat bed nine eight left".split(" ")
+
 # TRAIN_INDEX='train_words_index.txt'
 # TEST_INDEX='test_words_index.txt'
 SOURCE_URL = 'http://pannous.net/files/' #spoken_numbers.tar'
@@ -41,6 +44,7 @@ class Source:  # labels
 	NUMBER_WAVES = 'spoken_numbers_wav.tar'
 	NUMBER_IMAGES = 'spoken_numbers.tar'  # width=256 height=256
 	WORD_SPECTROS = 'https://dl.dropboxusercontent.com/u/23615316/spoken_words.tar'  # width,height=512# todo: sliding window!
+	SPEECH_COMMANDS = "http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz" # 16000Hz 1ch s16le (2 bytes per sample)
 	WORD_WAVES = 'spoken_words_wav.tar'
 	TEST_INDEX = 'test_index.txt'
 	TRAIN_INDEX = 'train_index.txt'
@@ -56,6 +60,7 @@ class Target(Enum):  # labels
 	sentiment=7
 	first_letter=8
 	hotword = 9
+	speech_commands = 10
 	# test_word=9 # use 5 even for speaker etc
 
 
@@ -129,7 +134,10 @@ def maybe_download(file, work_directory=DATA_DIR):
 	"""Download the data from Pannous's website, unless it's already here."""
 	print("Looking for data %s in %s"%(file,work_directory))
 	if not os.path.exists(work_directory):
-		os.mkdir(work_directory)
+		try:
+			os.mkdir(work_directory)
+		except:
+			pass
 	filepath = os.path.join(work_directory, re.sub('.*\/','',file))
 	if not os.path.exists(filepath):
 		if not file.startswith("http"): url_filename = SOURCE_URL + file
@@ -194,6 +202,7 @@ def spectro_batch_generator(batch_size=10,width=64,source_data=Source.DIGIT_SPEC
 	speakers=get_speakers(path)
 	if target==Target.digits: num_classes=10
 	if target==Target.first_letter: num_classes=32
+	if target==Target.speech_commands: num_classes=len(speech_commands)
 	files = os.listdir(path)
 	# shuffle(files) # todo : split test_fraction batch here!
 	# files=files[0:int(len(files)*(1-test_fraction))]

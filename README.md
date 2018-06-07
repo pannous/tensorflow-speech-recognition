@@ -3,6 +3,10 @@ Speech recognition using google's [tensorflow](https://github.com/tensorflow/ten
 
 Replaces [caffe-speech-recognition](https://github.com/pannous/caffe-speech-recognition), see there for some background.
 
+#Update: **Mozilla** released [DeepSpeech](https://github.com/mozilla/DeepSpeech)
+They achieved just good [0% error rate](http://doyouunderstand.me) ... on the training set;) 
+Free Speech is in good hands, for now *this* project is only maintained for educational purposes.
+
 ## Ultimate goal
 Create a decent standalone speech recognition for Linux etc.
 Some people say we have the models but not enough training data.
@@ -27,13 +31,9 @@ Later:
 
 ![Sample spectrogram or record.py](images/spectrogram.demo.png)
 
-## Partners + collaborators wanted
-We are in the process of tackling this project in seriousness. If you want to join the party just drop us an email at [info@pannous.com](mailto:info@pannous.com?subject=speech_recognition).
 <!-- ╮⚆ᴥ⚆╭ -->
 
 Update: Nervana [demonstrated](https://www.youtube.com/watch?v=NaqZkV_fBIM) that it is possible for 'independents' to build speech recognizers that are state of the art. 
-Update: **Mozilla** is working on [DeepSpeech
-](https://github.com/mozilla/DeepSpeech) and just achieved [0% error rate](http://doyouunderstand.me) ... on the training set;) Free Speech is in good hands.
 <!-- ᖗ*﹏*ᖘ -->
 
 ### Fun tasks for newcomers

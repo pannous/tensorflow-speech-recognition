@@ -1,3 +1,4 @@
+librosa
 #required
 tensorflow
 tflearn
