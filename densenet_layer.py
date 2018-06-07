@@ -1,6 +1,9 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 #!/usr/bin/env python
 #!/usr/bin/env python
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 #!/usr/bin/python
