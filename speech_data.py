@@ -30,6 +30,7 @@ bird stop marvin two five on off four dog up tree cat bed nine eight left".split
 # TRAIN_INDEX='train_words_index.txt'
 # TEST_INDEX='test_words_index.txt'
 SOURCE_URL = 'http://pannous.net/files/' #spoken_numbers.tar'
+
 DATA_DIR = 'data/'
 pcm_path = "data/spoken_numbers_pcm/" # 8 bit
 wav_path = "data/spoken_numbers_wav/" # 16 bit s16le
@@ -37,10 +38,10 @@ path = pcm_path
 CHUNK = 4096
 test_fraction=0.1 # 10% of data for test / verification
 
-# http://pannous.net/files/spoken_numbers_pcm.tar
 class Source:  # labels
-	DIGIT_WAVES = 'spoken_numbers_pcm.tar'
-	DIGIT_SPECTROS = 'spoken_numbers_spectros_64x64.tar'  # 64x64  baby data set, works astonishingly well
+	DIGIT_WAVES = './spoken_numbers_pcm.tar'
+	# DIGIT_SPECTROS = 'spoken_numbers_spectros_64x64.tar'  # 64x64  baby data set, works astonishingly well
+	DIGIT_SPECTROS = './spoken_numbers_spectros_64x64.tar'
 	NUMBER_WAVES = 'spoken_numbers_wav.tar'
 	NUMBER_IMAGES = 'spoken_numbers.tar'  # width=256 height=256
 	WORD_SPECTROS = 'https://dl.dropboxusercontent.com/u/23615316/spoken_words.tar'  # width,height=512# todo: sliding window!
