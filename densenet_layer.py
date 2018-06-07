@@ -1,22 +1,14 @@
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 #!/usr/bin/env python
-#!/usr/bin/env python
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 #!/usr/bin/python
 import tensorflow as tf
-
 import layer
 import speech_data
 from speech_data import Source,Target
 
+
 learning_rate = 0.001
 training_iters = 300000
 batch_size = 64
-
 
 # BASELINE toy net
 def simple_dense(net): # best with lr ~0.001
@@ -26,7 +18,6 @@ def simple_dense(net): # best with lr ~0.001
 	# net.denseNet(40, depth=4)
 	# net.classifier() # auto classes from labels
 	return
-
 
 def alex(net): # kinda
 	# type: (layer.net) -> None
@@ -70,12 +61,13 @@ else:
 	batch=word_batch=speech_data.spectro_batch_generator(10, width, source_data=Source.WORD_SPECTROS, target=Target.first_letter)
 	raise Exception("TODO")
 
+X,Y=next(batch)
 
 # CHOOSE MODEL ARCHITECTURE HERE:
 # net = layer.net(simple_dense, data=batch, input_width=width, output_width=classes, learning_rate=0.01)
-# net = layer.net(simple_dense, input_shape=(width,height), output_width=classes, learning_rate=0.01)
+net = layer.net(simple_dense, data=batch, input_shape=(width,height), output_width=classes, learning_rate=0.01)
 # net=layer.net(model=alex,input_shape=(width, height),output_width=10, learning_rate=learning_rate)
-net = layer.net(model=denseConv, input_shape=(width, height), output_width=10, learning_rate=learning_rate)
+# net=layer.net(model=denseConv, input_shape=(width, height),output_width=10, learning_rate=learning_rate)
 
 net.train(data=batch,batch_size=10,steps=500,dropout=0.6,display_step=1,test_step=1) # debug
 # net.train(data=batch,batch_size=10,steps=5000,dropout=0.6,display_step=5,test_step=20) # test
@@ -84,4 +76,4 @@ net.train(data=batch,batch_size=10,steps=500,dropout=0.6,display_step=1,test_ste
 # net.predict() # nil=random
 # net.generate(3)  # nil=random
 
-print ("Now try switching between model architectures in line 68-71")
+print ("Now try switiching between model architectures in line 68-71")
