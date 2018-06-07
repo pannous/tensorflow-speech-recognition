@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #!/usr/bin/python
 import tensorflow as tf
 import layer
@@ -10,6 +9,7 @@ learning_rate = 0.001
 training_iters = 300000
 batch_size = 64
 
+
 # BASELINE toy net
 def simple_dense(net): # best with lr ~0.001
 	# type: (layer.net) -> None
@@ -18,6 +18,7 @@ def simple_dense(net): # best with lr ~0.001
 	# net.denseNet(40, depth=4)
 	# net.classifier() # auto classes from labels
 	return
+
 
 def alex(net): # kinda
 	# type: (layer.net) -> None
@@ -76,4 +77,4 @@ net.train(data=batch,batch_size=10,steps=500,dropout=0.6,display_step=1,test_ste
 # net.predict() # nil=random
 # net.generate(3)  # nil=random
 
-print ("Now try switiching between model architectures in line 68-71")
+print ("Now try switching between model architectures in line 68-71")
