@@ -7,6 +7,8 @@ import tflearn
 
 import speech_data
 
+import os
+
 learning_rate = 0.0001
 training_iters = 300000  # steps
 batch_size = 64
@@ -38,12 +40,15 @@ net = tflearn.fully_connected(net, classes, activation='softmax')
 net = tflearn.regression(net, optimizer='adam', learning_rate=learning_rate, loss='categorical_crossentropy')
 # Training
 model = tflearn.DNN(net, tensorboard_verbose=0)
-model.load("tflearn.lstm.model")
+# check model exists or not
+if os.path.isfile("tflearn.lstm.model"):
+    print ("loading model tflearn.lstm.model")
+    model.load("tflearn.lstm.model")
 while 1: #training_iters
-  model.fit(trainX, trainY, n_epoch=100, validation_set=(testX, testY), show_metric=True,
+    model.fit(trainX, trainY, n_epoch=100, validation_set=(testX, testY), show_metric=True,
           batch_size=batch_size)
-  _y=model.predict(X)
+    _y=model.predict(X)
 model.save("tflearn.lstm.model")
 print (_y)
-print (y)
+print (Y)
 

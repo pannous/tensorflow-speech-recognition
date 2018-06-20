@@ -17,6 +17,31 @@ We disagree: There is plenty of training data (100GB [here](http://www.openslr.o
 ![Sample spectrogram, That's what she said, too laid?](images/0_Karen_160.png)
 
 Sample spectrogram, Karen uttering 'zero' with 160 words per minute.
+## Installation
+### clone code
+```
+git clone https://github.com/pannous/tensorflow-speech-recognition
+cd tensorflow-speech-recognition
+git clone https://github.com/pannous/layer.git
+git clone https://github.com/pannous/tensorpeers.git
+```
+
+### pyaudio
+#### requirements portaudio from http://www.portaudio.com/
+```
+git clone  https://git.assembla.com/portaudio.git
+./configure --prefix=/path/to/your/local
+make
+make install
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/your/local/lib
+export LIDRARY_PATH=$LIBRARY_PATH:/path/to/your/local/lib
+export CPATH=$CPATH:/path/to/your/local/include
+source ~/.bashrc
+```
+#### install pyaudio
+```
+pip install pyaudio
+```
 
 ## Getting started
 
