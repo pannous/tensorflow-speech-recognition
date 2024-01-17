@@ -4,7 +4,13 @@ Speech recognition using google's [tensorflow](https://github.com/tensorflow/ten
 Replaces [caffe-speech-recognition](https://github.com/pannous/caffe-speech-recognition), see there for some background.
 
 
-## Update **Mozilla** released [DeepSpeech](https://github.com/mozilla/DeepSpeech)
+## Update 2024: Use **Whisper** !
+
+This (relatively) old project is NO LONGER UP TO DATE,  
+the tensorflow used is not compatible anymore and the theory is no longer state of the art either.
+We highly recommend you check out and use [whisper](https://github.com/ggerganov/whisper.cpp)
+
+## Update 2020: **Mozilla** released [DeepSpeech](https://github.com/mozilla/DeepSpeech)
 They achieve good [error rates](http://doyouunderstand.me). Free Speech is in good hands, go *there* if you are an end user.
 For now *this* project is only maintained for educational purposes.
 
