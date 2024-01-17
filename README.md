@@ -6,8 +6,8 @@ Replaces [caffe-speech-recognition](https://github.com/pannous/caffe-speech-reco
 
 ## Update 2024: Use **Whisper** !
 
-This (relatively) old project is NO LONGER UP TO DATE,  
-the tensorflow used is not compatible anymore and the theory is no longer state of the art either.
+This (relatively) old project is NO LONGER UP TO DATE.  
+The tensorflow 1.0 used is not compatible anymore and the theory is no longer state of the art either.  
 We highly recommend you check out and use [whisper](https://github.com/ggerganov/whisper.cpp)
 
 ## Update 2020: **Mozilla** released [DeepSpeech](https://github.com/mozilla/DeepSpeech)
